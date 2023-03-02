@@ -37,53 +37,90 @@ int isValid(qr_comp qr_comp, vector<vector<int>> qr){
                 if (n - i  == j ){
                     qr_comp.db[1]--;
                 }
-                if (i <= floor(n/2) && j > floor(n/2)){
+                if (i+1 <= floor(n/2) && j+1 > floor(n/2)){
                     qr_comp.qb[0]--;
                 }
-                if (i <= floor(n/2) && j <= floor(n/2)){
+                if (i+1 <= floor(n/2) && j+1 <= floor(n/2)){
                     qr_comp.qb[1]--;
                 }
-                if (i > floor(n/2) && j <= floor(n/2)){
+                if (i+1 > floor(n/2) && j+1 <= floor(n/2)){
                     qr_comp.qb[2]--;
                 }
-                if (i > floor(n/2) && j > floor(n/2)){
+                if (i+1 > floor(n/2) && j+1 > floor(n/2)){
                     qr_comp.qb[3]--;
                 }
             }
         }
     }
     for (int i = 0; i < n; i++){
-        if (qr_comp.lb[i] != 0 || qr_comp.cb[i] != 0){
+        if (qr_comp.lb[i] <= -1 || qr_comp.cb[i] <= -1){
             //cout << "lb/cb!" << endl;
             return 0;
+        } else if (qr_comp.lb[i] != 0 || qr_comp.cb[i] != 0){
+            return 1;
         }
     }
     for (int i = 0; i < n; i++){
-        if (qr_comp.lt[i] != 0 || qr_comp.ct[i] != 0){
+        if (qr_comp.lt[i] <= -1 || qr_comp.ct[i] <= -1){
             //cout << "lt/ct!" << endl;
             return 0;
+        } else if (qr_comp.lt[i] != 0 || qr_comp.ct[i] != 0){
+            return 1;
         }
     }
     for (int i = 0; i < 2; i++){
-        if (qr_comp.db[i] != 0){
+        if (qr_comp.db[i] <= -1){
             //cout << "db!" << endl;
             return 0;
+        } else if (qr_comp.db[i] != 0){
+            return 1;
         }
     }
     for (int i = 0; i < 4; i++){
-        if (qr_comp.qb[i] != 0){
-            //cout << "qb!" << endl;
+        if (qr_comp.qb[i] <= -1){
+            //cout << "qb!" << i << " " << qr_comp.qb[i] <<  endl;
             return 0;
+        } else if (qr_comp.qb[i] != 0){
+            return 1;
         }
     }
-    return 1;
+    return 2;
+}
+
+
+void print_qr(vector<vector<int>> qr, int n){
+    cout << "+";
+    for (int i = 0; i < n; i++){
+        cout << "-";
+    }
+    cout << "+" << endl;
+    
+    for (int i = 0; i < n; i++){
+        cout << "|";
+        for (int j = 0; j < n; j++){
+            if(qr[i][j] == 1){
+                cout << "#";
+            }else if(qr[i][j] == 0){
+                cout << " ";
+            }
+        }
+        cout << "|" << endl;
+    }
+
+    cout << "+";
+    for (int i = 0; i < n; i++){
+        cout << "-";
+    }
+    cout << "+" << endl;
 }
 
 //Function that checks all possible qr codes and counts how many are valid
-int generate_check(qr_comp qr_comp, vector<vector<int>> & qr, vector<vector<vector<int>>> & valid_qrs, int x, int y , int paint){
+int generate_check(qr_comp qr_comp, vector<vector<int>> qr, vector<vector<vector<int>>> & valid_qrs, int x, int y , int paint){
     int count_valid = 0;
-    while(qr[x][y] == 1){
-        if (x == qr_comp.n){
+    //print_qr(qr,qr_comp.n);
+    
+    while(qr[x][y] == 1 && x < qr_comp.n - 1 && y < qr_comp.n - 1){
+        if(x == qr_comp.n -1){
             x = 0;
             y += 1;
         }else{
@@ -91,21 +128,28 @@ int generate_check(qr_comp qr_comp, vector<vector<int>> & qr, vector<vector<vect
         }
     }
     if(paint == 1)(qr)[x][y] = 1;
-    if (x == qr_comp.n - 1 && y == qr_comp.n - 1){
-        if (isValid(qr_comp,qr)){ 
-            if(valid_qrs.size() == 0){
-                valid_qrs.push_back(qr);
-            }
+    if (isValid(qr_comp,qr) == 2){ 
+        if(valid_qrs.size() == 0){
+            valid_qrs.push_back(qr);
             count_valid++;
         }
+        if(qr != valid_qrs[0]){
+            count_valid++;
+        }
+        
     }
-    else if (x == qr_comp.n - 1 && y <= qr_comp.n - 1){
-        count_valid += generate_check(qr_comp,qr,valid_qrs,0,y+1,1);
+
+    if (x == qr_comp.n - 1 && y < qr_comp.n - 1 && isValid(qr_comp,qr) == 0){
         count_valid += generate_check(qr_comp,qr,valid_qrs,0,y+1,0);
     }
-    else if ( x < qr_comp.n - 1){
-        count_valid += generate_check(qr_comp,qr,valid_qrs,x+1,y,1);
+    else if ( x < qr_comp.n - 1 && y < qr_comp.n - 1 && isValid(qr_comp,qr) == 0){
         count_valid += generate_check(qr_comp,qr,valid_qrs,x+1,y,0);   
+    } else if( x < qr_comp.n - 1 && y < qr_comp.n - 1 && isValid(qr_comp,qr) != 0){
+        count_valid += generate_check(qr_comp,qr,valid_qrs,x+1,y,0);
+        count_valid += generate_check(qr_comp,qr,valid_qrs,x+1,y,1);
+    } else if (x == qr_comp.n - 1 && y < qr_comp.n - 1 && isValid(qr_comp,qr) != 0){
+        count_valid += generate_check(qr_comp,qr,valid_qrs,0,y+1,0);
+        count_valid += generate_check(qr_comp,qr,valid_qrs,0,y+1,1);
     }
     return count_valid;   
 }
@@ -128,11 +172,13 @@ void pre_proccess(qr_comp qr_comp,  vector<vector<int>> & qr){
     for(int i = 0; i < 2; i++){
         if(qr_comp.db[i] == qr_comp.n){
             for (int j = 0; j < qr_comp.n; j++){
-                if (i == 0){
-                    qr[j][j] = 1;
-                }
-                else{
-                    qr[j][qr_comp.n - 1 - j] = 1;
+                for(int k = 0; k < qr_comp.n; k++){
+                    if (i == 0){
+                        qr[j][k] = 1;
+                    }
+                    else{
+                        qr[j][qr_comp.n - 1 - k] = 1;
+                    }
                 }
             }    
         }
@@ -198,29 +244,7 @@ int main(){
         {
             cout << "VALID: 1 QR Code generated!" << endl;
             //print qr code
-            cout << "+";
-            for (int i = 0; i < qr_comp.n; i++){
-                cout << "-";
-            }
-            cout << "+" << endl;
-            
-            for (int i = 0; i < qr_comp.n; i++){
-                cout << "|";
-                for (int j = 0; j < qr_comp.n; j++){
-                    if(valid_qrs[0][i][j] == 1){
-                        cout << "#";
-                    }else if(valid_qrs[0][i][j] == 0){
-                        cout << " ";
-                    }
-                }
-                cout << "|" << endl;
-            }
-
-            cout << "+";
-            for (int i = 0; i < qr_comp.n; i++){
-                cout << "-";
-            }
-            cout << "+" << endl;
+            print_qr(valid_qrs[0],qr_comp.n);
         }else if(counter > 1){
             cout << "INVALID: "<< counter << " QR Codes generated!" << endl;
         }else{

@@ -1,5 +1,4 @@
-# problema1_EA
-Problem A - QR Code decoder!
+# Problem A - QR Code decoder!
 Description
 QR (Quick Response) codes are two-dimensional barcodes that are utilized for storing and easily accessing data. The codes are made up mostly of black and white squares, and can be scanned using a smartphone and a QR code scanning app. These codes are often used in various industries, such as advertising, events, and product labeling, due to their fast scanning ability and significant storage capacity. In fact, they provide a quick and practical way of transferring information.
 

@@ -6,16 +6,15 @@
     "configurations": [
         {
             "name": "(gdb) Launch",
-            "type": "cppdbg",   
+            "type": "cppdbg",
             "request": "launch",
-            "program": "qr.exe",
-            "args": ["<","input.txt",">","output.txt"],
+            "program": "${fileDirname}\\${fileBasenameNoExtension}.exe",
+            "args": ["<","input.txt", ">", "output.txt" ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            "miDebuggerPath": "/path/to/gdb",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",

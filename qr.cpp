@@ -120,7 +120,7 @@ int generate_check(qr_comp qr_comp, vector<vector<int>> & qr, vector<vector<vect
     cout << "row: " << row << " col: " << col << endl;
     print_qr(qr, qr_comp.n);
 
-    if (col == qr_comp.n && row == qr_comp.n - 1){
+    if (row == qr_comp.n - 1 && col == qr_comp.n - 1){
         return 1;
     }
     
@@ -129,25 +129,25 @@ int generate_check(qr_comp qr_comp, vector<vector<int>> & qr, vector<vector<vect
         row++;
     }
 
+    if (qr[row][col] == 1){
+        return generate_check(qr_comp, qr, valid_qrs, row, col+1);
+    }
+
     int valid = isValid(qr_comp, qr);
     if (valid == 2){
         cout << "valid" << endl;
         valid_qrs.push_back(qr);
         return 1;
     }
-
     
-
-    
-    if (qr[row][col] == 1){
-        generate_check(qr_comp, qr, valid_qrs, row, col+1);
-    }
 
     qr[row][col] = 1;
     valid = isValid(qr_comp, qr);
     if (valid != 0){ 
         cout << "pintou" << endl;
-        generate_check(qr_comp, qr, valid_qrs, row, col+1);
+        if(generate_check(qr_comp, qr, valid_qrs, row, col+1)){
+            return 1;
+        }
     }
     qr[row][col] = 0;
     return 0;

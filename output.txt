@@ -1,19 +1,4 @@
 row: 0 col: 0
-+---+
-|   |
-|   |
-|   |
-+---+
-pintou
-row: 0 col: 1
-+---+
-|#  |
-|   |
-|   |
-+---+
-counter: 0
-DEFECT: No QR Code generated!
-row: 0 col: 0
 +----+
 |    |
 |    |
@@ -29,37 +14,3 @@ row: 0 col: 1
 |    |
 +----+
 pintou
-row: 0 col: 2
-+----+
-|##  |
-|    |
-|    |
-|    |
-+----+
-counter: 0
-DEFECT: No QR Code generated!
-row: 0 col: 0
-+----+
-|    |
-|    |
-|    |
-|    |
-+----+
-pintou
-row: 0 col: 1
-+----+
-|#   |
-|    |
-|    |
-|    |
-+----+
-pintou
-row: 0 col: 2
-+----+
-|##  |
-|    |
-|    |
-|    |
-+----+
-counter: 0
-DEFECT: No QR Code generated!

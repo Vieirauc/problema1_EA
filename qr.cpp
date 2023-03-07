@@ -114,45 +114,41 @@ void print_qr(vector<vector<int>> qr, int n){
     cout << "+" << endl;
 }
 
-//Function that checks all possible qr codes and counts how many are valid
-int generate_check(qr_comp qr_comp, vector<vector<int>> qr, vector<vector<vector<int>>> & valid_qrs, int x, int y , int paint){
-    int count_valid = 0;
-    while(qr[x][y] == 1){
-        if (x == qr_comp.n - 1 && y == qr_comp.n - 1){
-            break;
-        }else if( x < qr_comp.n - 1 && y <= qr_comp.n - 1){
-            x++;
-        } else if (x == qr_comp.n - 1 && y < qr_comp.n - 1){
-            x = 0;
-            y++;
-        }
+//TODO fazer backtracking ( validar se pode pintar a preto ou a branco , caso se puder pinta senão volta atrás)
+//Fuction that fills the empty spaces of the qr code verifying if it can paint it black or white using backtracking
+int generate_check(qr_comp qr_comp, vector<vector<int>> & qr, vector<vector<vector<int>>> & valid_qrs, int row, int col){
+    cout << "row: " << row << " col: " << col << endl;
+    print_qr(qr, qr_comp.n);
+    
+    if (col == qr_comp.n){
+        col = 0;
+        row++;
     }
-    if(paint == 1)(qr)[x][y] = 1;
-    //print_qr(qr,qr_comp.n);
 
-    if (x == qr_comp.n - 1 && y == qr_comp.n - 1){
-        print_qr(qr,qr_comp.n);
-        if(isValid(qr_comp,qr) == 2){
-            if(valid_qrs.size() == 0){
-            valid_qrs.push_back(qr);
-            count_valid++;
-            }
-            if(qr != valid_qrs[0]){
-                count_valid++;
-            }
-        }
-    }else if( x < qr_comp.n - 1 && y <= qr_comp.n - 1 && isValid(qr_comp,qr) == 0){
-        count_valid += generate_check(qr_comp,qr,valid_qrs,x+1,y,0);
-    } else if (x == qr_comp.n - 1 && y < qr_comp.n - 1 && isValid(qr_comp,qr) == 0){
-        count_valid += generate_check(qr_comp,qr,valid_qrs,0,y+1,0);
-    }else if( x < qr_comp.n - 1 && y <= qr_comp.n - 1){
-        count_valid += generate_check(qr_comp,qr,valid_qrs,x+1,y,0);
-        count_valid += generate_check(qr_comp,qr,valid_qrs,x+1,y,1);
-    } else if (x == qr_comp.n - 1 && y < qr_comp.n - 1){
-        count_valid += generate_check(qr_comp,qr,valid_qrs,0,y+1,0);
-        count_valid += generate_check(qr_comp,qr,valid_qrs,0,y+1,1);
+    int valid = isValid(qr_comp, qr);
+    if (valid == 2){
+        cout << "valid" << endl;
+        valid_qrs.push_back(qr);
+        return 1;
     }
-    return count_valid;   
+
+    if (row == qr_comp.n){
+        return 1;
+    }
+
+    
+    if (qr[row][col] == 1){
+        generate_check(qr_comp, qr, valid_qrs, row, col+1);
+    }
+
+    qr[row][col] = 1;
+    valid = isValid(qr_comp, qr);
+    if (valid != 0){ 
+        cout << "pintou" << endl;
+        generate_check(qr_comp, qr, valid_qrs, row, col+1);
+    }
+    qr[row][col] = 0;
+    return 0;
 }
 
 void pre_proccess(qr_comp qr_comp,  vector<vector<int>> & qr){
@@ -237,16 +233,10 @@ int main(){
         vector<vector<int>> qr(qr_comp.n, vector<int>(qr_comp.n, 0));
         vector<vector<vector<int>>> valid_qrs;
 
-        pre_proccess(qr_comp,qr);
-        if (isValid(qr_comp,qr) == 2)
-        {
-            cout << "VALID: 1 QR Code generated!" << endl;
-            //print qr code
-            print_qr(qr,qr_comp.n);
-        }
-        
-
-        int counter = generate_check(qr_comp,qr,valid_qrs,0,0,1) + generate_check(qr_comp,qr,valid_qrs,0,0,0);
+        //pre_proccess(qr_comp,qr);
+        generate_check(qr_comp, qr, valid_qrs, 0, 0);
+        int counter = valid_qrs.size();
+        cout << "counter: " << counter << endl;
 
         if (counter == 1)
         {

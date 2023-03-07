@@ -119,6 +119,10 @@ void print_qr(vector<vector<int>> qr, int n){
 int generate_check(qr_comp qr_comp, vector<vector<int>> & qr, vector<vector<vector<int>>> & valid_qrs, int row, int col){
     cout << "row: " << row << " col: " << col << endl;
     print_qr(qr, qr_comp.n);
+
+    if (col == qr_comp.n && row == qr_comp.n - 1){
+        return 1;
+    }
     
     if (col == qr_comp.n){
         col = 0;
@@ -132,9 +136,7 @@ int generate_check(qr_comp qr_comp, vector<vector<int>> & qr, vector<vector<vect
         return 1;
     }
 
-    if (row == qr_comp.n){
-        return 1;
-    }
+    
 
     
     if (qr[row][col] == 1){
@@ -233,7 +235,7 @@ int main(){
         vector<vector<int>> qr(qr_comp.n, vector<int>(qr_comp.n, 0));
         vector<vector<vector<int>>> valid_qrs;
 
-        //pre_proccess(qr_comp,qr);
+        pre_proccess(qr_comp,qr);
         generate_check(qr_comp, qr, valid_qrs, 0, 0);
         int counter = valid_qrs.size();
         cout << "counter: " << counter << endl;

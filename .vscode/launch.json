@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/qr.exe",
-            "args": ["<","input2.txt", ">", "output.txt" ],
+            "args": ["<","input.txt", ">", "output.txt" ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],

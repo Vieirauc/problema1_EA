@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cmath>
 
-#define DEBUG 0
+//#define DEBUG 0
 
 using namespace std;
 
@@ -20,7 +20,7 @@ struct qr_comp{
 };
 
 //Function that returns the next cell to be filled. TODO: change to a more efficient way and jump to the next cell if it is already filled
-vector<int> nextCell(int n, int x, int y) {
+vector<int> nextCell(int n, int x, int y, vector<vector<int>> qr) {
     int nextX = x; //(x + 1) % n;
     int nextY = y;
     if (y == n - 1) {
@@ -29,6 +29,9 @@ vector<int> nextCell(int n, int x, int y) {
     } else {
         nextX = x;
         nextY = y + 1;
+    }
+    if( nextX < n && nextY < n && qr[nextX][nextY] != -1){
+        return nextCell(n, nextX, nextY, qr);
     }
     return {nextX, nextY};
 }
@@ -39,65 +42,90 @@ int isValid(qr_comp qr_comp, vector<vector<int>> qr){
     int n = qr_comp.n;
     for (int i = 0; i < n; i++){
         for (int j = 0; j < n; j++){
-            if (j != n-1  && qr[i][j+1] != qr[i][j]){
-                qr_comp.lt[i]--;
+            if (qr_comp.lt[i] > qr_comp.lb[i]*2){
+                return 0;
             }
-            if (i != n-1   && qr[i+1][j] != qr[i][j]){
+            if (qr_comp.ct[j] > qr_comp.cb[j]*2){
+                return 0;
+            }
+            
+            /*
+            if (j != n-1  && (((qr[i][j] == 0 || qr[i][j] == -1) && qr[i][j+1] == 1) || (qr[i][j] == 1 && (qr[i][j+1] == 0 || qr[i][j+1] == -1)))){
+                qr_comp.lt[i]--;
+            } 
+            if (i != n-1   && (((qr[i+1][j] == 0 || qr[i+1][j] == -1) && qr[i][j] == 1) || (qr[i+1][j] == 1 && (qr[i][j] == 0 || qr[i][j] == -1)))){
                 qr_comp.ct[j]--;
             }
+            */
+
+            if (j != n-1  && (!(qr[i][j]-1) != !(qr[i][j+1]-1))){
+                qr_comp.lt[i]--;
+            } 
+            if (i != n-1  && (!(qr[i][j]-1) != !(qr[i+1][j]-1))){
+                qr_comp.ct[j]--;
+            }
+
+
             if (qr[i][j] == 1){
                 qr_comp.lb[i]--;
+                if (qr_comp.lb[i] < 0) return 0;
                 qr_comp.cb[j]--;
+                if (qr_comp.cb[j] < 0) return 0;
                 if (i == j){
                     qr_comp.db[0]--;
+                    if (qr_comp.db[0] < 0) return 0;
                 }
                 if (n - i - 1 == j ){
                     qr_comp.db[1]--;
+                    if (qr_comp.db[1] < 0) return 0;
                 }
                 if ((i+1) <= floor(n/2) && (j+1) > floor(n/2)){
                     qr_comp.qb[0]--;
+                    if (qr_comp.qb[0] < 0) return 0;
                 }
                 if ((i+1) <= floor(n/2) && (j+1) <= floor(n/2)){
                     qr_comp.qb[1]--;
+                    if (qr_comp.qb[1] < 0) return 0;
                 }
                 if ((i+1) > floor(n/2) && (j+1) <= floor(n/2)){
                     qr_comp.qb[2]--;
+                    if (qr_comp.qb[2] < 0) return 0;
                 }
                 if ((i+1) > floor(n/2) && (j+1) > floor(n/2)){
                     qr_comp.qb[3]--;
+                    if (qr_comp.qb[3] < 0) return 0;
                 }
             }
         }
     }
+
+    /*
+    cout << "lb:" << qr_comp.lb[0] << " " << qr_comp.lb[1] << " " << qr_comp.lb[2] << " " << qr_comp.lb[3] << endl;
+    cout << "cb:" << qr_comp.cb[0] << " " << qr_comp.cb[1] << " " << qr_comp.cb[2] << " " << qr_comp.cb[3] << endl;
+    cout << "lt:" << qr_comp.lt[0] << " " << qr_comp.lt[1] << " " << qr_comp.lt[2] << " " << qr_comp.lt[3] << endl;
+    cout << "ct:" << qr_comp.ct[0] << " " << qr_comp.ct[1] << " " << qr_comp.ct[2] << " " << qr_comp.ct[3] << endl;
+    cout << "qb:" << qr_comp.qb[0] << " " << qr_comp.qb[1] << " " << qr_comp.qb[2] << " " << qr_comp.qb[3] << endl;
+    cout << "db:" << qr_comp.db[0] << " " << qr_comp.db[1] << endl;
+    */
+    
+
     for (int i = 0; i < n; i++){
-        if (qr_comp.lb[i] <= -1 || qr_comp.cb[i] <= -1){
-            //cout << "lb/cb!" << endl;
-            return 0;
-        } else if (qr_comp.lb[i] != 0 || qr_comp.cb[i] != 0){
+        if (qr_comp.lb[i] != 0 || qr_comp.cb[i] != 0){
             return 1;
         }
     }
     for (int i = 0; i < n; i++){
-        if (qr_comp.lt[i] <= -1 || qr_comp.ct[i] <= -1){
-            //cout << "lt/ct!" << endl;
-            return 0;
-        } else if (qr_comp.lt[i] != 0 || qr_comp.ct[i] != 0){
+        if (qr_comp.lt[i] != 0 || qr_comp.ct[i] != 0){
             return 1;
         }
     }
     for (int i = 0; i < 2; i++){
-        if (qr_comp.db[i] <= -1){
-            //cout << "db!" << endl;
-            return 0;
-        } else if (qr_comp.db[i] != 0){
+        if (qr_comp.db[i] != 0){
             return 1;
         }
     }
     for (int i = 0; i < 4; i++){
-        if (qr_comp.qb[i] <= -1){
-            //cout << "qb!" << i << " " << qr_comp.qb[i] <<  endl;
-            return 0;
-        } else if (qr_comp.qb[i] != 0){
+        if (qr_comp.qb[i] != 0){
             return 1;
         }
     }
@@ -118,6 +146,8 @@ void print_qr(vector<vector<int>> qr, int n){
             if(qr[i][j] == 1){
                 cout << "#";
             }else if(qr[i][j] == 0){
+                cout << " ";
+            }else if(qr[i][j] == -1){
                 cout << " ";
             }
         }
@@ -166,7 +196,8 @@ int generate_check(qr_comp qr_comp, vector<vector<int>> qr, vector<vector<vector
 
     // generate descendants
     vector<int> next{row, col};
-    while((next = nextCell(qr_comp.n, next[0], next[1]))[0] != qr_comp.n){
+    while((next = nextCell(qr_comp.n, next[0], next[1], qr))[0] != qr_comp.n){
+        //if(qr[next[0]][next[1]] == 1)continue;
         qr[next[0]][next[1]] = 1;
         generate_check(qr_comp, qr, valid_qrs, counter, next[0], next[1], level + 1);
         qr[next[0]][next[1]] = 0; // @luis tive q por isto para evitar um wrapper. assim a primeira chamada à funcao pode ser feita com row=-1 e col=n-1
@@ -175,36 +206,70 @@ int generate_check(qr_comp qr_comp, vector<vector<int>> qr, vector<vector<vector
     return 0;
 }
 
-/*void pre_proccess(qr_comp qr_comp,  vector<vector<int>> & qr){
+void pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
+
+    //Pre process linhas
     for (int i = 0; i < qr_comp.n; i++){
         if(qr_comp.lb[i] == qr_comp.n){
             for (int j = 0; j < qr_comp.n; j++){
                 qr[i][j] = 1;
-            }    
+                //qr_comp.lb[i]--;
+            }        
+        }else if(qr_comp.lb[i] == 0){
+            for (int j = 0; j < qr_comp.n; j++){
+                qr[i][j] = 0;
+                //qr_comp.lb[i]--;
+            }        
         }
     }
+    //Pre process colunas
     for (int i = 0; i < qr_comp.n; i++){
         if(qr_comp.cb[i] == qr_comp.n){
             for (int j = 0; j < qr_comp.n; j++){
                 qr[j][i] = 1;
+                //qr_comp.cb[i]--;
+            }    
+        } else if(qr_comp.cb[i] == 0){
+            for (int j = 0; j < qr_comp.n; j++){
+                qr[j][i] = 0;
+                //qr_comp.cb[i]--;
             }    
         }
     }
+    //Pre process diagonais
     for(int i = 0; i < 2; i++){
         if(qr_comp.db[i] == qr_comp.n){
             for (int j = 0; j < qr_comp.n; j++){
                 for(int k = 0; k < qr_comp.n; k++){
-                    if (i == 0){
+                    if (i == 0 && j == k){
                         qr[j][k] = 1;
                     }
-                    else{
+                    else if (i == 1 && qr_comp.n - j - 1 == k){
                         qr[j][qr_comp.n - 1 - k] = 1;
                     }
+                    //qr_comp.db[i]--;
+                }
+            }    
+        }else if(qr_comp.db[i] == 0){
+            for (int j = 0; j < qr_comp.n; j++){
+                for(int k = 0; k < qr_comp.n; k++){
+                    if (i == 0 && j == k){
+                        qr[j][k] = 0;
+                    }
+                    else if (i == 1 && qr_comp.n - j - 1 == k ){
+                        qr[j][k] = 0;
+                    }
+                    //qr_comp.db[i]--;
                 }
             }    
         }
     }
-}*/
+    /*
+    cout << "Pre process" << endl;
+    print_qr(qr, qr_comp.n);
+    cout << endl;
+    */
+}
 
 int main(){
     int n_qr;
@@ -254,12 +319,13 @@ int main(){
             qr_comp.db.push_back(value);
         }
 
-        vector<vector<int>> qr(qr_comp.n, vector<int>(qr_comp.n, 0));
+        vector<vector<int>> qr(qr_comp.n, vector<int>(qr_comp.n, -1));
+        //cout << "BEFORE pre process" << endl;
+        //print_qr(qr, qr_comp.n);
+        //cout << endl;
         vector<vector<vector<int>>> valid_qrs;
         int counter = 0;
-        //pre_proccess(qr_comp,qr);
-        // start_generation(qr_comp, qr);
-        
+        pre_proccess(qr_comp,qr);
         generate_check(qr_comp, qr, valid_qrs, counter, -1, qr_comp.n - 1, 0);
 
         if (counter == 1)

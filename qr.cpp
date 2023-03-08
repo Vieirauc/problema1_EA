@@ -34,6 +34,7 @@ vector<int> nextCell(int n, int x, int y) {
 }
 
 //Check if the qr code is valid. If it is valid return 2, if it is not valid return 0 (can´t proceed), if it is valid but not complete return 1
+//TODO: corrigir as falhas de validação. nao deteta todos os invalidos
 int isValid(qr_comp qr_comp, vector<vector<int>> qr){
     int n = qr_comp.n;
     for (int i = 0; i < n; i++){

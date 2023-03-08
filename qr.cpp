@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <cmath>
 
+//#define DEBUG 0
+
 using namespace std;
 
 struct qr_comp{
@@ -17,6 +19,7 @@ struct qr_comp{
     vector<int> db;
 };
 
+//Function that returns the next cell to be filled. TODO: change to a more efficient way and jump to the next cell if it is already filled
 vector<int> nextCell(int n, int x, int y) {
     int nextX = x; //(x + 1) % n;
     int nextY = y;
@@ -129,30 +132,45 @@ void print_qr(vector<vector<int>> qr, int n){
 
 //TODO fazer backtracking ( validar se pode pintar a preto ou a branco , caso se puder pinta senão volta atrás)
 //Fuction that fills the empty spaces of the qr code verifying if it can paint it black or white using backtracking
-int generate_check(qr_comp qr_comp, vector<vector<int>> qr, vector<vector<vector<int>>> & valid_qrs, int row, int col, int level){
+int generate_check(qr_comp qr_comp, vector<vector<int>> qr, vector<vector<vector<int>>> & valid_qrs, int & counter, int row, int col, int level){
+    #ifdef DEBUG
+    cout << "row: " << row << " col: " << col << endl;
     print_qr(qr, qr_comp.n);
-    /*int valid = isValid(qr_comp, qr);
-
+    #endif
+    
+    // check if the qr code is valid
+    int valid = isValid(qr_comp, qr);
     switch(valid){
         case 0:
+            #ifdef DEBUG
+            cout << "Invalid" << endl;
+            #endif
             return 0;
         case 1:
+            #ifdef DEBUG
+            cout << "Valid but not complete" << endl;
+            #endif
             break;
         case 2:
-            //TODO add only if vector is empty
-            valid_qrs.push_back(qr);
-            return 0;
-    }*/
-    vector<int> next(row, col);
-    while(next[0] != qr_comp.n){
-        next = nextCell(qr_comp.n, next[0], next[1]);
-        cout << "next: " << next[0] << " " << next[1] << endl;
-        //generate_check(qr_comp, qr, valid_qrs, next[0], next[1], level + 1);
+            #ifdef DEBUG
+            cout << "Valid and complete" << endl;
+            #endif
+            if(!counter) {
+                valid_qrs.push_back(qr);
+            }
+            counter++;
+            return 1;
     }
 
 
-
-    
+    // generate descendants
+    vector<int> next{row, col};
+    while((next = nextCell(qr_comp.n, next[0], next[1]))[0] != qr_comp.n){
+        qr[next[0]][next[1]] = 1;
+        generate_check(qr_comp, qr, valid_qrs, counter, next[0], next[1], level + 1);
+        qr[next[0]][next[1]] = 0; // @luis tive q por isto para evitar um wrapper. assim a primeira chamada à funcao pode ser feita com row=-1 e col=n
+        // aceitam-se ideias melhores
+    }
     return 0;
 }
 
@@ -237,11 +255,11 @@ int main(){
 
         vector<vector<int>> qr(qr_comp.n, vector<int>(qr_comp.n, 0));
         vector<vector<vector<int>>> valid_qrs;
-
+        int counter = 0;
         //pre_proccess(qr_comp,qr);
-        generate_check(qr_comp, qr, valid_qrs, 0, 0, 0);
-        int counter = valid_qrs.size();
-        cout << "counter: " << counter << endl;
+        // start_generation(qr_comp, qr);
+        
+        generate_check(qr_comp, qr, valid_qrs, counter, -1, qr_comp.n - 1, 0);
 
         if (counter == 1)
         {

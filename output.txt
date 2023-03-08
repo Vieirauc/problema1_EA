@@ -1,4 +1,78 @@
+row: -1 col: 1
 +--+
 |  |
 |  |
++--+
+Valid but not complete
+row: 0 col: 0
++--+
+|# |
+|  |
++--+
+Valid but not complete
+row: 0 col: 1
++--+
+|##|
+|  |
++--+
+Invalid
+row: 1 col: 0
++--+
+|# |
+|# |
++--+
+Valid and complete
+row: 1 col: 1
++--+
+|# |
+| #|
++--+
+Valid but not complete
+row: 0 col: 1
++--+
+| #|
+|  |
++--+
+Valid but not complete
+row: 1 col: 0
++--+
+| #|
+|# |
++--+
+Valid but not complete
+row: 1 col: 1
++--+
+| #|
+|##|
++--+
+Valid but not complete
+row: 1 col: 1
++--+
+| #|
+| #|
++--+
+Valid but not complete
+row: 1 col: 0
++--+
+|  |
+|# |
++--+
+Valid but not complete
+row: 1 col: 1
++--+
+|  |
+|##|
++--+
+Valid but not complete
+row: 1 col: 1
++--+
+|  |
+| #|
++--+
+Valid but not complete
+counter: 1
+VALID: 1 QR Code generated!
++--+
+|# |
+|# |
 +--+

@@ -17,7 +17,20 @@ struct qr_comp{
     vector<int> db;
 };
 
-//Check if the qr code is valid
+vector<int> nextCell(int n, int x, int y) {
+    int nextX = x; //(x + 1) % n;
+    int nextY = y;
+    if (y == n - 1) {
+        nextX = x + 1;
+        nextY = 0;
+    } else {
+        nextX = x;
+        nextY = y + 1;
+    }
+    return {nextX, nextY};
+}
+
+//Check if the qr code is valid. If it is valid return 2, if it is not valid return 0 (can´t proceed), if it is valid but not complete return 1
 int isValid(qr_comp qr_comp, vector<vector<int>> qr){
     int n = qr_comp.n;
     for (int i = 0; i < n; i++){
@@ -116,44 +129,34 @@ void print_qr(vector<vector<int>> qr, int n){
 
 //TODO fazer backtracking ( validar se pode pintar a preto ou a branco , caso se puder pinta senão volta atrás)
 //Fuction that fills the empty spaces of the qr code verifying if it can paint it black or white using backtracking
-int generate_check(qr_comp qr_comp, vector<vector<int>> & qr, vector<vector<vector<int>>> & valid_qrs, int row, int col){
-    cout << "row: " << row << " col: " << col << endl;
+int generate_check(qr_comp qr_comp, vector<vector<int>> qr, vector<vector<vector<int>>> & valid_qrs, int row, int col, int level){
     print_qr(qr, qr_comp.n);
+    /*int valid = isValid(qr_comp, qr);
 
-    if (row == qr_comp.n - 1 && col == qr_comp.n - 1){
-        return 1;
+    switch(valid){
+        case 0:
+            return 0;
+        case 1:
+            break;
+        case 2:
+            //TODO add only if vector is empty
+            valid_qrs.push_back(qr);
+            return 0;
+    }*/
+    vector<int> next(row, col);
+    while(next[0] != qr_comp.n){
+        next = nextCell(qr_comp.n, next[0], next[1]);
+        cout << "next: " << next[0] << " " << next[1] << endl;
+        //generate_check(qr_comp, qr, valid_qrs, next[0], next[1], level + 1);
     }
+
+
+
     
-    if (col == qr_comp.n){
-        col = 0;
-        row++;
-    }
-
-    if (qr[row][col] == 1){
-        return generate_check(qr_comp, qr, valid_qrs, row, col+1);
-    }
-
-    int valid = isValid(qr_comp, qr);
-    if (valid == 2){
-        cout << "valid" << endl;
-        valid_qrs.push_back(qr);
-        return 1;
-    }
-    
-
-    qr[row][col] = 1;
-    valid = isValid(qr_comp, qr);
-    if (valid != 0){ 
-        cout << "pintou" << endl;
-        if(generate_check(qr_comp, qr, valid_qrs, row, col+1)){
-            return 1;
-        }
-    }
-    qr[row][col] = 0;
     return 0;
 }
 
-void pre_proccess(qr_comp qr_comp,  vector<vector<int>> & qr){
+/*void pre_proccess(qr_comp qr_comp,  vector<vector<int>> & qr){
     for (int i = 0; i < qr_comp.n; i++){
         if(qr_comp.lb[i] == qr_comp.n){
             for (int j = 0; j < qr_comp.n; j++){
@@ -182,7 +185,7 @@ void pre_proccess(qr_comp qr_comp,  vector<vector<int>> & qr){
             }    
         }
     }
-}
+}*/
 
 int main(){
     int n_qr;
@@ -235,8 +238,8 @@ int main(){
         vector<vector<int>> qr(qr_comp.n, vector<int>(qr_comp.n, 0));
         vector<vector<vector<int>>> valid_qrs;
 
-        pre_proccess(qr_comp,qr);
-        generate_check(qr_comp, qr, valid_qrs, 0, 0);
+        //pre_proccess(qr_comp,qr);
+        generate_check(qr_comp, qr, valid_qrs, 0, 0, 0);
         int counter = valid_qrs.size();
         cout << "counter: " << counter << endl;
 

@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cmath>
 
-//#define DEBUG 0
+#define DEBUG 0
 
 using namespace std;
 
@@ -155,11 +155,11 @@ int generate_check(qr_comp qr_comp, vector<vector<int>> qr, vector<vector<vector
             #ifdef DEBUG
             cout << "Valid and complete" << endl;
             #endif
-            if(!counter) {
+            if(!counter) { // é p poupar memoria, mas podemos ver se e necessario
                 valid_qrs.push_back(qr);
             }
             counter++;
-            return 1;
+            return 1; // @luis aqui parece-me q é return como tinhas mas quero ver isso, n tenho a certeza se estou a pensar bem. os filhos tem obrigatoriamente os pretos dos pais, pelo que acho que mais abaixo na arvore vamos infringir regras (se corresponder ao encoding entao é pq ja nao pode ter mais pretos)
     }
 
 
@@ -168,7 +168,7 @@ int generate_check(qr_comp qr_comp, vector<vector<int>> qr, vector<vector<vector
     while((next = nextCell(qr_comp.n, next[0], next[1]))[0] != qr_comp.n){
         qr[next[0]][next[1]] = 1;
         generate_check(qr_comp, qr, valid_qrs, counter, next[0], next[1], level + 1);
-        qr[next[0]][next[1]] = 0; // @luis tive q por isto para evitar um wrapper. assim a primeira chamada à funcao pode ser feita com row=-1 e col=n
+        qr[next[0]][next[1]] = 0; // @luis tive q por isto para evitar um wrapper. assim a primeira chamada à funcao pode ser feita com row=-1 e col=n-1
         // aceitam-se ideias melhores
     }
     return 0;

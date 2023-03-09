@@ -5,18 +5,30 @@
 #include <algorithm>
 #include <cmath>
 
-#define DEBUG 0
+// #define DEBUG 0
 
 using namespace std;
 
 struct qr_comp{
     int n;
+    //pretos
     vector<int> lb;
     vector<int> cb;
-    vector<int> lt;
-    vector<int> ct;
     vector<int> qb;
     vector<int> db;
+    //brancos
+    vector<int> lw;
+    vector<int> cw;
+    vector<int> qw;
+    vector<int> dw;
+    //indefinidos
+    vector<int> indef_l; //indefinidos em cada linha
+    vector<int> indef_c; //indefinidos em cada coluna
+    vector<int> indef_q; //indefinidos em cada quadrante
+    vector<int> indef_d; //indefinidos em cada diagonal
+    //transicoes
+    vector<int> lt;
+    vector<int> ct;
 };
 
 //Function that returns the next cell to be filled. TODO: change to a more efficient way and jump to the next cell if it is already filled
@@ -38,10 +50,12 @@ vector<int> nextCell(int n, int x, int y, vector<vector<int>> qr) {
 
 //Check if the qr code is valid. If it is valid return 2, if it is not valid return 0 (can´t proceed), if it is valid but not complete return 1
 //TODO: corrigir as falhas de validação. nao deteta todos os invalidos
+//TODO: adicionar validacao para os brancos tb, neste momento estao a passar ao lado
 int isValid(qr_comp qr_comp, vector<vector<int>> qr){
     int n = qr_comp.n;
     for (int i = 0; i < n; i++){
         for (int j = 0; j < n; j++){
+            //transicoes
             if (qr_comp.lt[i] > qr_comp.lb[i]*2){
                 return 0;
             }
@@ -65,7 +79,7 @@ int isValid(qr_comp qr_comp, vector<vector<int>> qr){
                 qr_comp.ct[j]--;
             }
 
-
+            //pretos
             if (qr[i][j] == 1){
                 qr_comp.lb[i]--;
                 if (qr_comp.lb[i] < 0) return 0;
@@ -95,18 +109,28 @@ int isValid(qr_comp qr_comp, vector<vector<int>> qr){
                     qr_comp.qb[3]--;
                     if (qr_comp.qb[3] < 0) return 0;
                 }
+
+            //brancos
+            } else if (qr[i][j] == 0){
+                qr_comp.lw[i]--;
+                if (qr_comp.lw[i] < 0) return 0;
+                qr_comp.cw[j]--;
+                if (qr_comp.cw[j] < 0) return 0;
+                //TODO: adicionar validacao para as diagonais e quadrantes, mas antes tratar da sua inicializacao e preprocessing
+                /*if (i == j){
+                    qr_comp.dw[0]--;
+                    if (qr_comp.dw[0] < 0) return 0;
+                }*/
             }
         }
     }
 
-    /*
-    cout << "lb:" << qr_comp.lb[0] << " " << qr_comp.lb[1] << " " << qr_comp.lb[2] << " " << qr_comp.lb[3] << endl;
-    cout << "cb:" << qr_comp.cb[0] << " " << qr_comp.cb[1] << " " << qr_comp.cb[2] << " " << qr_comp.cb[3] << endl;
-    cout << "lt:" << qr_comp.lt[0] << " " << qr_comp.lt[1] << " " << qr_comp.lt[2] << " " << qr_comp.lt[3] << endl;
-    cout << "ct:" << qr_comp.ct[0] << " " << qr_comp.ct[1] << " " << qr_comp.ct[2] << " " << qr_comp.ct[3] << endl;
-    cout << "qb:" << qr_comp.qb[0] << " " << qr_comp.qb[1] << " " << qr_comp.qb[2] << " " << qr_comp.qb[3] << endl;
-    cout << "db:" << qr_comp.db[0] << " " << qr_comp.db[1] << endl;
-    */
+    // for(int i = 0; i < qr_comp.n; i++){
+    //     cout << qr_comp.lb[i] << " ";
+    // }
+    // cout << endl;
+    
+    
     
 
     for (int i = 0; i < n; i++){
@@ -205,46 +229,86 @@ int generate_check(qr_comp qr_comp, vector<vector<int>> qr, vector<vector<vector
     }
     return 0;
 }
-
-void pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
+//TODO: trocar as referencias a filas vazias ou cheias de 0 para n - indef e de n para indef, respetivamente
+//TODO: dar update ao preprocessing das diagonais e acrescentar o dos quadrantes
+//TODO: pensar se a preprocess devera ser chamada em cada chamada recursiva a generate_check ou se devera ser ela propria recusiva, ou os dois
+int pre_proccess(qr_comp qr_comp,  vector<vector<int>> & qr){
 
     //Pre process linhas
+    //inicialmente indef = n
+    //depois, indef decrementa sempre q se pinta uma celula, quer de preto quer de branco
     for (int i = 0; i < qr_comp.n; i++){
-        if(qr_comp.lb[i] == qr_comp.n){
+        if(qr_comp.lb[i] == qr_comp.indef_l[i]){ //se o numero de pretos na linha for igual ao numero de indefinidos
             for (int j = 0; j < qr_comp.n; j++){
-                qr[i][j] = 1;
-                //qr_comp.lb[i]--;
-            }        
-        }else if(qr_comp.lb[i] == 0){
+                if(qr_comp.lb[i] == 0) break;
+                if(qr[i][j] == 0) return 1;
+                if (qr[i][j] == -1) { //TODO: talvez extrair este if para uma funcao para n estar sempre a repetir codigo
+                    qr[i][j] = 1;
+                    qr_comp.indef_l[i]--;
+                    qr_comp.indef_c[j]--;
+                    //visto q estou a passar por copia, posso decrementar tambem o numero de pretos na linha e coluna, para manter o numero de pretos q falta preencher e nao o numero total
+                    qr_comp.lb[i]--;
+                    qr_comp.cb[j]--;
+                }
+            }
+        }else if(qr_comp.lw[i] == qr_comp.indef_l[i]){ //se o numero de brancos na linha for igual ao numero de indefinidos
             for (int j = 0; j < qr_comp.n; j++){
-                qr[i][j] = 0;
-                //qr_comp.lb[i]--;
+                if(qr_comp.lw[i] == 0) break;
+                if(qr[i][j] == 1) return 1;
+                if(qr[i][j] == -1){
+                    qr[i][j] = 0;
+                    qr_comp.indef_l[i]--;
+                    qr_comp.indef_c[j]--;
+                    //visto q estou a passar por copia, posso decrementar tambem o numero de brancos na linha e coluna, para manter o numero de pretos q falta preencher e nao o numero total
+                    qr_comp.lw[i]--;
+                    qr_comp.cw[j]--;
+                }
             }        
         }
     }
+    
     //Pre process colunas
     for (int i = 0; i < qr_comp.n; i++){
-        if(qr_comp.cb[i] == qr_comp.n){
+        if(qr_comp.cb[i] == qr_comp.indef_c[i]){ //se o numero de pretos na coluna for igual ao numero de indefinidos
             for (int j = 0; j < qr_comp.n; j++){
-                qr[j][i] = 1;
-                //qr_comp.cb[i]--;
+                if(qr_comp.cb[i] == 0) break; //se o numero de pretos na coluna for 0, nao ha mais pretos para pintar (nao ha mais indefinidos
+                if(qr[j][i] == 0) return 1;
+                if(qr[j][i] == -1) {
+                    qr[j][i] = 1;
+                    qr_comp.indef_c[i]--;
+                    qr_comp.indef_l[j]--;
+                    //visto q estou a passar por copia, posso decrementar tambem o numero de pretos na linha e coluna, para manter o numero de pretos q falta preencher e nao o numero total
+                    qr_comp.lb[j]--;
+                    qr_comp.cb[i]--;
+                }
             }    
-        } else if(qr_comp.cb[i] == 0){
+        } else if(qr_comp.cw[i] == 0){//qr_comp.indef_c[i]){ //se o numero de brancos na coluna for igual ao numero de indefinidos
             for (int j = 0; j < qr_comp.n; j++){
-                qr[j][i] = 0;
-                //qr_comp.cb[i]--;
+                if(qr_comp.cw[i] == 0) break; //se o numero de brancos na coluna for 0, nao ha mais brancos para pintar (nao ha mais indefinidos
+                if(qr[j][i] == 1) return 1;
+                if(qr[j][i] == -1) {
+                    qr[j][i] = 0;
+                    qr_comp.indef_c[i]--;
+                    qr_comp.indef_l[j]--;
+                    //visto q estou a passar por copia, posso decrementar tambem o numero de brancos na linha e coluna, para manter o numero de pretos q falta preencher e nao o numero total
+                    qr_comp.lw[j]--;
+                    qr_comp.cw[i]--;
+                }
             }    
         }
     }
+    /*vamos so ignorar as diagonais e os quadrantes por agora
     //Pre process diagonais
     for(int i = 0; i < 2; i++){
         if(qr_comp.db[i] == qr_comp.n){
             for (int j = 0; j < qr_comp.n; j++){
                 for(int k = 0; k < qr_comp.n; k++){
                     if (i == 0 && j == k){
+                        if(qr[j][k] == 0) return 1;
                         qr[j][k] = 1;
                     }
                     else if (i == 1 && qr_comp.n - j - 1 == k){
+                        if(qr[j][qr_comp.n - 1 - k] == 0) return 1;
                         qr[j][qr_comp.n - 1 - k] = 1;
                     }
                     //qr_comp.db[i]--;
@@ -254,9 +318,11 @@ void pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
             for (int j = 0; j < qr_comp.n; j++){
                 for(int k = 0; k < qr_comp.n; k++){
                     if (i == 0 && j == k){
+                        if(qr[j][k] == 1) return 1;
                         qr[j][k] = 0;
                     }
                     else if (i == 1 && qr_comp.n - j - 1 == k ){
+                        if(qr[j][qr_comp.n - 1 - k] == 1) return 1;
                         qr[j][k] = 0;
                     }
                     //qr_comp.db[i]--;
@@ -264,11 +330,23 @@ void pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
             }    
         }
     }
-    /*
+
+    //pre process quadrantes
+
+
+    */
+
+
+    #ifdef DEBUG
     cout << "Pre process" << endl;
     print_qr(qr, qr_comp.n);
+    for(int i = 0; i < qr_comp.n; i++){
+        cout << qr_comp.lb[i] << " ";
+    }
     cout << endl;
-    */
+    #endif
+    
+   return 0;
 }
 
 int main(){
@@ -287,12 +365,14 @@ int main(){
         for(int i = 0; i < qr_comp.n; i++){
             cin >> value;
             qr_comp.lb.push_back(value);
+            qr_comp.lw.push_back(qr_comp.n - value);
         }
 
         //Read the amount of black squares in each column
         for(int i = 0; i < qr_comp.n; i++){
             cin >> value;
             qr_comp.cb.push_back(value);
+            qr_comp.cw.push_back(qr_comp.n - value);
         }
 
         //Read the amount of transitions in each row
@@ -311,13 +391,29 @@ int main(){
         for(int i = 0; i < 4; i++){
             cin >> value;
             qr_comp.qb.push_back(value);
+            //TODO: adicionar inicializacao de qw
         }
 
         //Read the amount of transitions in each diagonal - main  and antidiagonal
         for(int i = 0; i < 2; i++){
             cin >> value;
             qr_comp.db.push_back(value);
+            //TODO: adicionar inicializacao de dw
         }
+
+        // initialize indefs
+        qr_comp.indef_l.assign(qr_comp.n, qr_comp.n); //n valores a n porque o qr é quadrado e no inicio todos sao indefs
+        qr_comp.indef_c.assign(qr_comp.n, qr_comp.n);
+        qr_comp.indef_d.assign(2, qr_comp.n);
+        // para os quadrantes nao é tao facil pq cada quadrante tem um tamanho diferente
+        int l_quadrante, a_quadrante; //largura, altura
+        for(int i = 1; i <= 4; i++){
+            l_quadrante = a_quadrante = qr_comp.n/2;
+            if(i == 1 || i == 4) l_quadrante += qr_comp.n%2;
+            if(i == 3 || i == 4) a_quadrante += qr_comp.n%2;
+            qr_comp.indef_q.push_back(l_quadrante * a_quadrante);
+        }
+
 
         vector<vector<int>> qr(qr_comp.n, vector<int>(qr_comp.n, -1));
         //cout << "BEFORE pre process" << endl;
@@ -325,7 +421,10 @@ int main(){
         //cout << endl;
         vector<vector<vector<int>>> valid_qrs;
         int counter = 0;
-        pre_proccess(qr_comp,qr);
+        if(pre_proccess(qr_comp,qr)) {//se devolver 1 é invalido
+            cout << "DEFECT: No QR Code generated!" << endl;
+            continue;
+        }
         generate_check(qr_comp, qr, valid_qrs, counter, -1, qr_comp.n - 1, 0);
 
         if (counter == 1)

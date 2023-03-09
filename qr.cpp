@@ -206,8 +206,7 @@ int generate_check(qr_comp qr_comp, vector<vector<int>> qr, vector<vector<vector
     return 0;
 }
 
-void pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
-
+int pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
     //Pre process linhas
     for (int i = 0; i < qr_comp.n; i++){
         if(qr_comp.lb[i] == qr_comp.n){
@@ -264,10 +263,125 @@ void pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
             }    
         }
     }
+    //Pre process even quadrants
+    if((qr_comp.n % 2 == 0)){
+        for(int i = 0; i < 4; i++){
+            if(qr_comp.qb[i] == (qr_comp.n/2)*(qr_comp.n/2)){
+                for (int j = 0; j < qr_comp.n; j++){
+                    for(int k = 0; k < qr_comp.n; k++){
+                        if ((j+1) <= floor(qr_comp.n/2) && (k+1) > floor(qr_comp.n/2) && i == 0){
+                            qr[j][k] = 1;
+                        }
+                        if ((j+1) <= floor(qr_comp.n/2) && (k+1) <= floor(qr_comp.n/2 && i == 1)){
+                            qr[j][k] = 1;
+                        }
+                        if ((j+1) > floor(qr_comp.n/2) && (k+1) <= floor(qr_comp.n/2) && i == 2){
+                            qr[j][k] = 1;
+                        }
+                        if ((j+1) > floor(qr_comp.n/2) && (k+1) > floor(qr_comp.n/2) && i == 3){
+                            qr[j][k] = 1;
+                        }
+                    }
+                }
+            }else if(qr_comp.qb[i] == 0){
+                for (int j = 0; j < qr_comp.n; j++){
+                    for(int k = 0; k < qr_comp.n; k++){
+                        if ((j+1) <= floor(qr_comp.n/2) && (k+1) > floor(qr_comp.n/2) && i == 0){
+                            qr[j][k] = 0;
+                        }
+                        if ((j+1) <= floor(qr_comp.n/2) && (k+1) <= floor(qr_comp.n/2 && i == 1)){
+                            qr[j][k] = 0;
+                        }
+                        if ((j+1) > floor(qr_comp.n/2) && (k+1) <= floor(qr_comp.n/2) && i == 2){
+                            qr[j][k] = 0;
+                        }
+                        if ((j+1) > floor(qr_comp.n/2) && (k+1) > floor(qr_comp.n/2) && i == 3){
+                            qr[j][k] = 0;
+                        }
+                    }
+                }
+            }      
+        }
+    //Pre process odd quadrants
+    }else if(qr_comp.n % 2 != 0 ){
+        if(qr_comp.qb[0] == (qr_comp.n/2)*(qr_comp.n/2+1)){
+            for (int j = 0; j < qr_comp.n; j++){
+                for(int k = 0; k < qr_comp.n; k++){
+                    if ((j+1) <= floor(qr_comp.n/2) && (k+1) > floor(qr_comp.n/2)){
+                        qr[j][k] = 1;
+                    }
+                }
+            }
+        }else if(qr_comp.qb[1] == (qr_comp.n/2)*(qr_comp.n/2)){
+            for (int j = 0; j < qr_comp.n; j++){
+                for(int k = 0; k < qr_comp.n; k++){
+                    if ((j+1) <= floor(qr_comp.n/2) && (k+1) <= floor(qr_comp.n/2)){
+                        qr[j][k] = 1;
+                    }
+                }
+            }
+        }else if(qr_comp.qb[2] == (qr_comp.n/2)*(qr_comp.n/2 + 1)){
+            for (int j = 0; j < qr_comp.n; j++){
+                for(int k = 0; k < qr_comp.n; k++){
+                    if ((j+1) > floor(qr_comp.n/2) && (k+1) <= floor(qr_comp.n/2)){
+                        qr[j][k] = 1;
+                    }
+                }
+            }
+        }else if(qr_comp.qb[3] == (qr_comp.n/2 + 1)*(qr_comp.n/2 + 1)){
+            for (int j = 0; j < qr_comp.n; j++){
+                for(int k = 0; k < qr_comp.n; k++){
+                    if ((j+1) > floor(qr_comp.n/2) && (k+1) > floor(qr_comp.n/2)){
+                        qr[j][k] = 1;
+                    }
+                }
+            }
+        }else if(qr_comp.qb[0] == 0){
+            for (int j = 0; j < qr_comp.n; j++){
+                for(int k = 0; k < qr_comp.n; k++){
+                    if ((j+1) <= floor(qr_comp.n/2) && (k+1) > floor(qr_comp.n/2)){
+                        qr[j][k] = 0;
+                    }
+                }
+            }
+        }else if(qr_comp.qb[1] == 0){
+            for (int j = 0; j < qr_comp.n; j++){
+                for(int k = 0; k < qr_comp.n; k++){
+                    if ((j+1) <= floor(qr_comp.n/2) && (k+1) <= floor(qr_comp.n/2)){
+                        qr[j][k] = 0;
+                    }
+                }
+            }
+        }else if(qr_comp.qb[2] == 0){
+            for (int j = 0; j < qr_comp.n; j++){
+                for(int k = 0; k < qr_comp.n; k++){
+                    if ((j+1) > floor(qr_comp.n/2) && (k+1) <= floor(qr_comp.n/2)){
+                        qr[j][k] = 0;
+                    }
+                }
+            }
+        }else if(qr_comp.qb[3] == 0){
+            for (int j = 0; j < qr_comp.n; j++){
+                for(int k = 0; k < qr_comp.n; k++){
+                    if ((j+1) > floor(qr_comp.n/2) && (k+1) > floor(qr_comp.n/2)){
+                        qr[j][k] = 0;
+                    }
+                }
+            }
+        }
+    }
+    
     
     cout << "Pre process" << endl;
     print_qr(qr, qr_comp.n);
     cout << endl;
+    
+
+    if(isValid(qr_comp, qr) == 0){
+        return 0;
+    }
+    
+    return 1;
     
 }
 
@@ -325,7 +439,10 @@ int main(){
         //cout << endl;
         vector<vector<vector<int>>> valid_qrs;
         int counter = 0;
-        pre_proccess(qr_comp,qr);
+        if(pre_proccess(qr_comp,qr) == 0){
+            cout << "DEFECT: No QR Code generated!" << endl;
+            continue;
+        };
         generate_check(qr_comp, qr, valid_qrs, counter, -1, qr_comp.n - 1, 0);
 
         if (counter == 1)

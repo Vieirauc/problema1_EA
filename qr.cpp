@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cmath>
 
-#define DEBUG 0
+//#define DEBUG 0
 
 using namespace std;
 
@@ -170,12 +170,12 @@ int generate_check(qr_comp qr_comp, vector<vector<int>> qr, vector<vector<vector
     print_qr(qr, qr_comp.n);
     cout << "level: " << level << endl;
     #endif
-    if(level > qr_comp.sum){
-        #ifdef DEBUG
-        cout << "Max level reached" << endl;
-        #endif
-        return 0;
-    }
+    // if(level > qr_comp.sum){
+    //     #ifdef DEBUG
+    //     cout << "Max level reached" << endl;
+    //     #endif
+    //     return 0;
+    // }
     // check if the qr code is valid
     int valid = isValid(qr_comp, qr);
     switch(valid){
@@ -240,7 +240,7 @@ int pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
             for (int j = 0; j < qr_comp.n; j++){
                 if(qr[j][i] == 0) return -1;
                 if(qr[j][i] == -1) {
-                   pintadas++;
+                    pintadas++;
                     qr[j][i] = 1;
                 }
                 //qr_comp.cb[i]--;
@@ -358,10 +358,10 @@ int main(){
         cout << endl;
         cout << "Falta pintar: " << qr_comp.sum - pintadas << endl;
         #endif
-        if(pintadas == -1){
-            cout << "DEFECT: No QR Code generated!" << endl;
-            continue;
-        }
+        // if(pintadas == -1){
+        //     cout << "DEFECT: No QR Code generated!" << endl;
+        //     continue;
+        // }
         generate_check(qr_comp, qr, valid_qrs, counter, -1, qr_comp.n - 1, pintadas);
 
         if (counter == 1)

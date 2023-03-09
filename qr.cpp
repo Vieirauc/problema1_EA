@@ -264,11 +264,11 @@ void pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
             }    
         }
     }
-    /*
+    
     cout << "Pre process" << endl;
     print_qr(qr, qr_comp.n);
     cout << endl;
-    */
+    
 }
 
 int main(){

@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cmath>
 
-//#define DEBUG 0
+#define DEBUG 0
 
 using namespace std;
 
@@ -17,6 +17,7 @@ struct qr_comp{
     vector<int> ct;
     vector<int> qb;
     vector<int> db;
+    int sum;
 };
 
 //Function that returns the next cell to be filled. TODO: change to a more efficient way and jump to the next cell if it is already filled
@@ -167,8 +168,14 @@ int generate_check(qr_comp qr_comp, vector<vector<int>> qr, vector<vector<vector
     #ifdef DEBUG
     cout << "row: " << row << " col: " << col << endl;
     print_qr(qr, qr_comp.n);
+    cout << "level: " << level << endl;
     #endif
-    
+    if(level > qr_comp.sum){
+        #ifdef DEBUG
+        cout << "Max level reached" << endl;
+        #endif
+        return 0;
+    }
     // check if the qr code is valid
     int valid = isValid(qr_comp, qr);
     switch(valid){
@@ -193,7 +200,7 @@ int generate_check(qr_comp qr_comp, vector<vector<int>> qr, vector<vector<vector
             return 1; // @luis aqui parece-me q é return como tinhas mas quero ver isso, n tenho a certeza se estou a pensar bem. os filhos tem obrigatoriamente os pretos dos pais, pelo que acho que mais abaixo na arvore vamos infringir regras (se corresponder ao encoding entao é pq ja nao pode ter mais pretos)
     }
 
-
+    if(level >= qr_comp.sum) return 0; // aproveitando-me do facto de na nova arvore o nivel de recursao ser igual ao de celulas pintadas - 1
     // generate descendants
     vector<int> next{row, col};
     while((next = nextCell(qr_comp.n, next[0], next[1], qr))[0] != qr_comp.n){
@@ -206,17 +213,22 @@ int generate_check(qr_comp qr_comp, vector<vector<int>> qr, vector<vector<vector
     return 0;
 }
 
-void pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
-
+int pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
+    int pintadas = 0;
     //Pre process linhas
     for (int i = 0; i < qr_comp.n; i++){
         if(qr_comp.lb[i] == qr_comp.n){
             for (int j = 0; j < qr_comp.n; j++){
-                qr[i][j] = 1;
+                if(qr[i][j] == 0) return -1;
+                if(qr[i][j] == -1) {
+                   pintadas++;
+                    qr[i][j] = 1;
+                }
                 //qr_comp.lb[i]--;
             }        
         }else if(qr_comp.lb[i] == 0){
             for (int j = 0; j < qr_comp.n; j++){
+                if(qr[i][j] == 1) return -1;
                 qr[i][j] = 0;
                 //qr_comp.lb[i]--;
             }        
@@ -226,11 +238,16 @@ void pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
     for (int i = 0; i < qr_comp.n; i++){
         if(qr_comp.cb[i] == qr_comp.n){
             for (int j = 0; j < qr_comp.n; j++){
-                qr[j][i] = 1;
+                if(qr[j][i] == 0) return -1;
+                if(qr[j][i] == -1) {
+                   pintadas++;
+                    qr[j][i] = 1;
+                }
                 //qr_comp.cb[i]--;
             }    
         } else if(qr_comp.cb[i] == 0){
             for (int j = 0; j < qr_comp.n; j++){
+                if(qr[i][j] == 1) return -1;
                 qr[j][i] = 0;
                 //qr_comp.cb[i]--;
             }    
@@ -242,10 +259,18 @@ void pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
             for (int j = 0; j < qr_comp.n; j++){
                 for(int k = 0; k < qr_comp.n; k++){
                     if (i == 0 && j == k){
-                        qr[j][k] = 1;
+                        if(qr[j][k] == 0) return -1;
+                        if(qr[j][k] == -1)  {
+                            pintadas++;
+                            qr[j][k] = 1;
+                        }
                     }
                     else if (i == 1 && qr_comp.n - j - 1 == k){
-                        qr[j][qr_comp.n - 1 - k] = 1;
+                        if(qr[j][qr_comp.n - 1 - k] == 0) return -1;
+                        if(qr[j][qr_comp.n - 1 - k] == -1)  {
+                            pintadas++;
+                            qr[j][qr_comp.n - 1 - k] = 1;
+                        }                        
                     }
                     //qr_comp.db[i]--;
                 }
@@ -254,21 +279,19 @@ void pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
             for (int j = 0; j < qr_comp.n; j++){
                 for(int k = 0; k < qr_comp.n; k++){
                     if (i == 0 && j == k){
+                        if(qr[j][k] == 1) return -1;
                         qr[j][k] = 0;
                     }
                     else if (i == 1 && qr_comp.n - j - 1 == k ){
-                        qr[j][k] = 0;
+                        if(qr[j][qr_comp.n - 1 - k] == 1) return -1;
+                        qr[j][qr_comp.n - 1 - k] = 1; // qr[j][k] = 0; //alterei esta linha q me pareceu q estava mal. vê o que achas. acho q nos enganamos a copiar de cima. na antidiagonal acho q é (j, n-1-k)
                     }
                     //qr_comp.db[i]--;
                 }
             }    
         }
     }
-    /*
-    cout << "Pre process" << endl;
-    print_qr(qr, qr_comp.n);
-    cout << endl;
-    */
+    return pintadas;
 }
 
 int main(){
@@ -281,13 +304,16 @@ int main(){
         n_qr--;
         qr_comp qr_comp;
         int value;
+        int sum = 0;
         //Read size of the qr code
         cin >> qr_comp.n;
         //Read the amount of black squares in each row
         for(int i = 0; i < qr_comp.n; i++){
             cin >> value;
             qr_comp.lb.push_back(value);
+            sum += value;
         }
+        qr_comp.sum = sum;
 
         //Read the amount of black squares in each column
         for(int i = 0; i < qr_comp.n; i++){
@@ -325,8 +351,18 @@ int main(){
         //cout << endl;
         vector<vector<vector<int>>> valid_qrs;
         int counter = 0;
-        pre_proccess(qr_comp,qr);
-        generate_check(qr_comp, qr, valid_qrs, counter, -1, qr_comp.n - 1, 0);
+        int pintadas = pre_proccess(qr_comp,qr);
+        #ifdef DEBUG
+        cout << "Pre process" << endl;
+        print_qr(qr, qr_comp.n);
+        cout << endl;
+        cout << "Falta pintar: " << qr_comp.sum - pintadas << endl;
+        #endif
+        if(pintadas == -1){
+            cout << "DEFECT: No QR Code generated!" << endl;
+            continue;
+        }
+        generate_check(qr_comp, qr, valid_qrs, counter, -1, qr_comp.n - 1, pintadas);
 
         if (counter == 1)
         {

@@ -236,17 +236,32 @@ void fillCell(vector<vector<int>> & qr, qr_comp & qr_comp, int row, int col, int
     qr[row][col] = value;
     qr_comp.indef_l[row]--;
     qr_comp.indef_c[col]--;
+
+
+
     //visto q estou a passar por copia, posso decrementar tambem o numero de pretos na linha e coluna, para manter o numero de pretos q falta preencher e nao o numero total
     if(value == 1){ //se for preto
         qr_comp.lb[row]--;
         qr_comp.cb[col]--;
-        if(row == col) qr_comp.db[0]--;
-        if(row + col == qr_comp.n - 1) qr_comp.db[1]--;//se for a celula do meio vai decrementar para as duas diagonais, e é suposto
+        if(row == col) {
+            qr_comp.db[0]--;
+            qr_comp.indef_d[0]--;
+        }
+        if(row + col == qr_comp.n - 1){//se for a celula do meio vai decrementar para as duas diagonais, e é suposto
+            qr_comp.db[1]--;
+            qr_comp.indef_d[1]--;
+        }
     } else if(value == 0){ //se for branco
         qr_comp.lw[row]--;
         qr_comp.cw[col]--;
-        if(row == col) qr_comp.dw[0]--;
-        if(row + col == qr_comp.n - 1) qr_comp.dw[1]--;
+        if(row == col){
+            qr_comp.dw[0]--;
+            qr_comp.indef_d[0]--;
+        }
+        if(row + col == qr_comp.n - 1) {
+            qr_comp.dw[1]--;
+            qr_comp.indef_d[1]--;
+        }
     }
 }
 
@@ -300,30 +315,28 @@ int pre_proccess(qr_comp qr_comp,  vector<vector<int>> & qr){
     }
     
     //Pre process diagonais
+    //i = 0 -> diagonal principal, i = 1 -> diagonal secundaria, j = row e k = col
     for(int i = 0; i < 2; i++){
-        if(qr_comp.db[i] == qr_comp.indef_d[i]){
-            cout << "entrou no if" << endl;
+        if(qr_comp.db[i] == qr_comp.indef_d[i]){ //se o numero de pretos na diagonal for igual ao numero de indefinidos
             for (int j = 0; j < qr_comp.n; j++){
                 for(int k = 0; k < qr_comp.n; k++){
                     if (i == 0 && j == k){ //se for a diagonal principal
                         if(qr_comp.db[i] == 0) break; //se o numero de pretos na diagonal for 0, nao ha mais pretos para pintar (nao ha mais indefinidos)
                         if(qr[j][k] == 0) return -1;
                         if(qr[j][k] == -1) {
-                            cout << "diagonal principal" << endl;
                             fillCell(qr, qr_comp, j, k, 1, newCellFilledFlag);
                         }
                     }
                     else if (i == 1 && qr_comp.n - j - 1 == k){ //se for a diagonal secundaria
                         if(qr_comp.db[i] == 0) break; //se o numero de pretos na diagonal for 0, nao ha mais pretos para pintar (nao ha mais indefinidos
                         if(qr[j][qr_comp.n - 1 - k] == 0) return -1;
-                        if(qr[j][qr_comp.n - 1 - k] == -1) {
-                            cout << "diagonal secundaria" << endl;
-                            fillCell(qr, qr_comp, j, qr_comp.n - 1 - k, 1, newCellFilledFlag);
+                        if(qr[j][k] == -1) {
+                            fillCell(qr, qr_comp, j, k, 1, newCellFilledFlag);
                         }
                     }
                 }
             }    
-        }else if(qr_comp.dw[i] == qr_comp.indef_d[i]){
+        }else if(qr_comp.dw[i] == qr_comp.indef_d[i]){ //se o numero de brancos na diagonal for igual ao numero de indefinidos
             for (int j = 0; j < qr_comp.n; j++){
                 for(int k = 0; k < qr_comp.n; k++){
                     if (i == 0 && j == k){
@@ -343,18 +356,24 @@ int pre_proccess(qr_comp qr_comp,  vector<vector<int>> & qr){
     //pre process quadrantes
 
 
-
     #ifdef DEBUG
     cout << "Pre process" << endl;
     print_qr(qr, qr_comp.n);
+    cout << "Filled cells: " << newCellFilledFlag << endl;
     for(int i = 0; i < 2; i++){
         cout << qr_comp.db[i] << " ";
-        cout << qr_comp.indef_d[i] << endl;
+    }
+    cout << endl;
+    for(int i = 0; i < 2; i++){
+        cout << qr_comp.indef_d[i] << " ";
     }
     cout << endl;
     #endif
     
-   return newCellFilledFlag;
+    //se preencheu alguma celula, entra em recursao com o qr_comp atualizado
+    if(newCellFilledFlag) return pre_proccess(qr_comp, qr);
+
+    return newCellFilledFlag;
 }
 
 int main(){
@@ -436,11 +455,8 @@ int main(){
         //cout << endl;
         vector<vector<vector<int>>> valid_qrs;
         int counter = 0;
-        int cellsFilled = 1; // so para entrar no ciclo
-        while(cellsFilled > 0) {//se devolver 1 é invalido
-            cellsFilled = pre_proccess(qr_comp,qr);
-        }
-        if(cellsFilled == -1) {
+       
+        if(pre_proccess(qr_comp,qr) == -1) {
             cout << "DEFECT: No QR Code generated!" << endl;
             continue;
         }            

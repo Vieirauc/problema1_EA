@@ -63,7 +63,7 @@ void print_qr(vector<vector<int>> qr, int n){
             if(qr[i][j] == 1){
                 cout << "#";
             }else if(qr[i][j] == 0){
-                cout << "0";
+                cout << " ";
             }else if(qr[i][j] == -1){
                 cout << " ";
             }

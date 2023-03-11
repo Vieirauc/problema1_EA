@@ -50,26 +50,42 @@ vector<int> nextCell(int n, int x, int y, vector<vector<int>> qr) {
     return {nextX, nextY};
 }
 
-void print_qr(vector<vector<int>> qr, int n){
+void print_qr(vector<vector<int>> qr, int n, bool inverted){
     cout << "+";
     for (int i = 0; i < n; i++){
         cout << "-";
     }
     cout << "+" << endl;
-    
-    for (int i = 0; i < n; i++){
-        cout << "|";
-        for (int j = 0; j < n; j++){
-            if(qr[i][j] == 1){
-                cout << "#";
-            }else if(qr[i][j] == 0){
-                cout << " ";
-            }else if(qr[i][j] == -1){
-                cout << " ";
+    if(!inverted) {
+        for (int i = 0; i < n; i++){
+            cout << "|";
+            for (int j = 0; j < n; j++){
+                if(qr[i][j] == 1){
+                    cout << "#";
+                }else if(qr[i][j] == 0){
+                    cout << " ";
+                }else if(qr[i][j] == -1){
+                    cout << " ";
+                }
             }
-        }
-        cout << "|" << endl;
+            cout << "|" << endl;
+        } 
+    } else {
+        for (int i = 0; i < n; i++){
+            cout << "|";
+            for (int j = 0; j < n; j++){
+                if(qr[i][j] == 1){
+                    cout << " ";
+                }else if(qr[i][j] == 0){
+                    cout << "#"; //aqui tanto o branco como o indef têm que ser #
+                }else if(qr[i][j] == -1){
+                    cout << "#"; //aqui tanto o branco como o indef têm que ser #
+                }
+            }
+            cout << "|" << endl;
+        } 
     }
+    
 
     cout << "+";
     for (int i = 0; i < n; i++){
@@ -335,7 +351,7 @@ int  pre_proccess(qr_comp qr_comp,  vector<vector<int>> & qr){
 
     #ifdef DEBUG
     cout << "Pre process" << endl;
-    print_qr(qr, qr_comp.n);
+    print_qr(qr, qr_comp.n, false);
     cout << "Filled cells: " << newCellFilledFlag << endl;
     for(int i = 0; i < 2; i++){
         cout << qr_comp.db[i] << " ";
@@ -489,7 +505,13 @@ int isValid(qr_comp & qr_comp, vector<vector<int>> qr){
     return 2;
 }
 
-
+bool isValidDescendant(qr_comp & qr_comp, int row, int col) { //deteta se a celula pode ser pintada de acordo com os pretos disponiveis
+    if (qr_comp.lb[row] == 0 || qr_comp.cb[col] == 0) return false;
+    if (qr_comp.qb[getQuadrant(qr_comp.n, row, col)] == 0) return false;
+    if (row == col && qr_comp.db[0] == 0) return false;
+    if (qr_comp.n - row -1 == col && qr_comp.db[1] == 0) return false;
+    return true;
+}
 
 
 //TODO fazer backtracking ( validar se pode pintar a preto ou a branco , caso se puder pinta senão volta atrás)
@@ -498,7 +520,7 @@ int generate_check(qr_comp & original_qr_comp, vector<vector<int>> qr, vector<ve
     #ifdef DEBUG
     cout << "level: " << level << endl;
     cout << "row: " << row << " col: " << col << endl;
-    print_qr(qr, original_qr_comp.n);
+    print_qr(qr, original_qr_comp.n, false);
     #endif
     
     // check if the qr code is valid
@@ -537,15 +559,15 @@ int generate_check(qr_comp & original_qr_comp, vector<vector<int>> qr, vector<ve
     cout << endl;
     #endif
     while((next = nextCell(original_qr_comp.n, next[0], next[1], qr))[0] != original_qr_comp.n){
-        //if(copy_qr_comp.lb[next[0]] == 0 || copy_qr_comp.cb[next[1]] == 0) continue;// || copy_qr_comp.qb[getQuadrant(original_qr_comp.n, next[0], next[1])]) continue;
+        //if(isValidDescendant(copy_qr_comp, next[0], next[1]) == false) continue;
         
-        //print_qr(qr, original_qr_comp.n);
+        //print_qr(qr, original_qr_comp.n, false);
         vector<vector<int>> copy_qr(qr);
         // qr[next[0]][next[1]] = 1;
         int newCellFilled;
         fillCell(copy_qr, copy_qr_comp, next[0], next[1], 1, newCellFilled);
         generate_check(original_qr_comp, copy_qr, valid_qrs, counter, next[0], next[1], level + 1);
-        qr[next[0]][next[1]] = 0; // @luis tive q por isto para evitar um wrapper. assim a primeira chamada à funcao pode ser feita com row=-1 e col=n-1
+        fillCell(qr, copy_qr_comp, next[0], next[1], 0, newCellFilled);//qr[next[0]][next[1]] = 0; // @luis tive q por isto para evitar um wrapper. assim a primeira chamada à funcao pode ser feita com row=-1 e col=n-1
         // aceitam-se ideias melhores
     }
     return 0;
@@ -626,11 +648,40 @@ int main(){
             qr_comp.dw.push_back(qr_comp.n - value);
         }
 
+        //Detect if the qr code is more black or more white and invert if the later is true (isValid and others get considerably faster)
+        bool inverted = false;
+        int aux;
+        if(qr_comp.sum > qr_comp.n * qr_comp.n / 2){
+            inverted = true;
+            #ifdef DEBUG
+            cout << "QR is mostly white: Solving inverted" << endl;
+            #endif
+            qr_comp.sum = qr_comp.n * qr_comp.n - qr_comp.sum;
+            for(int i = 0; i < qr_comp.n; i++){
+                aux = qr_comp.lb[i];
+                qr_comp.lb[i] = qr_comp.lw[i];
+                qr_comp.lw[i] = aux;
+
+                aux = qr_comp.cb[i];
+                qr_comp.cb[i] = qr_comp.cw[i];
+                qr_comp.cw[i] = aux;
+            }
+            for(int i = 0; i < 4; i++){
+                aux = qr_comp.qb[i];
+                qr_comp.qb[i] = qr_comp.qw[i];
+                qr_comp.qw[i] = aux;
+            }
+            for(int i = 0; i < 2; i++){
+                aux = qr_comp.db[i];
+                qr_comp.db[i] = qr_comp.dw[i];
+                qr_comp.dw[i] = aux;
+            }
+        }
         
 
         vector<vector<int>> qr(qr_comp.n, vector<int>(qr_comp.n, -1));
         //cout << "BEFORE pre process" << endl;
-        //print_qr(qr, qr_comp.n);
+        //print_qr(qr, qr_comp.n, false);
         //cout << endl;
         vector<vector<vector<int>>> valid_qrs;
         int counter = 0;
@@ -658,7 +709,7 @@ int main(){
         qr = vect;*/
         #ifdef DEBUG
         cout << "AFTER pre process" << endl;
-        print_qr(qr, qr_comp.n);
+        print_qr(qr, qr_comp.n, false);
         #endif
 
 
@@ -668,7 +719,7 @@ int main(){
         {
             cout << "VALID: 1 QR Code generated!" << endl;
             //print qr code
-            print_qr(valid_qrs[0],qr_comp.n);
+            print_qr(valid_qrs[0],qr_comp.n, inverted);
         }else if(counter > 1){
             cout << "INVALID: "<< counter << " QR Codes generated!" << endl;
         }else{

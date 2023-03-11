@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cmath>
 
-// #define DEBUG
+#define DEBUG
 
 using namespace std;
 

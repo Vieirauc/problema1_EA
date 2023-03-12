@@ -50,6 +50,16 @@ vector<int> nextCell(int n, int x, int y, vector<vector<int>> qr) {
     return {nextX, nextY};
 }
 
+int getQuadrant(int n, int row, int col){
+    if(row+1 <= n/2) { //quadrantes 1 e 2
+        if(col+1 > n/2) return 0;
+        else return 1;
+    } else { //quadrantes 3 e 4
+        if(col+1 <= n/2) return 2;
+        else return 3;
+    }
+}
+
 void print_qr(vector<vector<int>> qr, int n, bool inverted){
     cout << "+";
     for (int i = 0; i < n; i++){
@@ -63,7 +73,7 @@ void print_qr(vector<vector<int>> qr, int n, bool inverted){
                 if(qr[i][j] == 1){
                     cout << "#";
                 }else if(qr[i][j] == 0){
-                    cout << " ";
+                    cout << "0";
                 }else if(qr[i][j] == -1){
                     cout << " ";
                 }
@@ -94,18 +104,133 @@ void print_qr(vector<vector<int>> qr, int n, bool inverted){
     cout << "+" << endl;
 }
 
-int getQuadrant(int n, int row, int col){
-    if(row+1 <= n/2) { //quadrantes 1 e 2
-        if(col+1 > n/2) return 0;
-        else return 1;
-    } else { //quadrantes 3 e 4
-        if(col+1 <= n/2) return 2;
-        else return 3;
+void print_qr_comp(qr_comp qr_comp, int row, int col) { //para nbao dar destaque basta por row e col a -1
+    cout << "lb: ";
+    for (int i = 0; i < qr_comp.n; i++){
+        if(i == row)
+        cout << "|" << qr_comp.lb[i] << "|" << " ";
+        else
+            cout << qr_comp.lb[i] << " ";
     }
+    cout << endl;
+    cout << "cb: ";
+    for (int i = 0; i < qr_comp.n; i++){
+        if(i == col)
+            cout << "|" << qr_comp.cb[i] << "|" << " ";
+        else
+            cout << qr_comp.cb[i] << " ";
+    }
+    cout << endl;
+    cout << "lt: ";
+    for (int i = 0; i < qr_comp.n; i++){
+        if(i == row)
+            cout << "|" << qr_comp.lt[i] << "|" << " ";
+        else
+            cout << qr_comp.lt[i] << " ";
+    }
+    cout << endl;
+    cout << "ct: ";
+    for (int i = 0; i < qr_comp.n; i++){
+        if(i == col)
+            cout << "|" << qr_comp.ct[i] << "|" << " ";
+        else
+            cout << qr_comp.ct[i] << " ";
+    }
+    cout << endl;
+    cout << "qb: ";
+    for (int i = 0; i < 4; i++){
+        if(i == getQuadrant(qr_comp.n, row, col))
+            cout << "|" << qr_comp.qb[i] << "|" << " ";
+        else
+            cout << qr_comp.qb[i] << " ";
+    }
+    cout << endl;
+    cout << "db: ";
+    for (int i = 0; i < 2; i++){
+        if((row == col && i == 0) || (row + col == qr_comp.n - 1 && i == 1))
+            cout << "|" << qr_comp.db[i] << "|" << " ";
+        else
+            cout << qr_comp.db[i] << " ";
+    }
+    cout << endl;
+    cout << "sum: " << qr_comp.sum << endl;
+    cout << "lw: ";
+    for (int i = 0; i < qr_comp.n; i++){
+        if(i == row)
+            cout << "|" << qr_comp.lw[i] << "|" << " ";
+        else
+            cout << qr_comp.lw[i] << " ";
+    }
+    cout << endl;
+    cout << "cw: ";
+    for (int i = 0; i < qr_comp.n; i++){
+        if(i == col)
+            cout << "|" << qr_comp.cw[i] << "|" << " ";
+        else
+            cout << qr_comp.cw[i] << " ";
+    }
+    cout << endl;
+    cout << "qw: ";
+    for (int i = 0; i < 4; i++){
+        if(i == getQuadrant(qr_comp.n, row, col))
+            cout << "|" << qr_comp.qw[i] << "|" << " ";
+        else
+            cout << qr_comp.qw[i] << " ";
+    }
+    cout << endl;
+    cout << "dw: ";
+    for (int i = 0; i < 2; i++){
+        if((row == col && i == 0) || (row + col == qr_comp.n - 1 && i == 1))
+            cout << "|" << qr_comp.dw[i] << "|" << " ";
+        else
+            cout << qr_comp.dw[i] << " ";
+    }
+    cout << endl;
+    cout << "indef_l: ";
+    for (int i = 0; i < qr_comp.n; i++){
+        if(i == row)
+            cout << "|" << qr_comp.indef_l[i] << "|" << " ";
+        else
+            cout << qr_comp.indef_l[i] << " ";
+    }
+    cout << endl;
+    cout << "indef_c: ";
+    for (int i = 0; i < qr_comp.n; i++){
+        if(i == col)
+            cout << "|" << qr_comp.indef_c[i] << "|" << " ";
+        else
+            cout << qr_comp.indef_c[i] << " ";
+    }
+    cout << endl;
+    cout << "indef_q: ";
+    for (int i = 0; i < 4; i++){
+        if(i == getQuadrant(qr_comp.n, row, col))
+            cout << "|" << qr_comp.indef_q[i] << "|" << " ";
+        else
+            cout << qr_comp.indef_q[i] << " ";
+    }
+    cout << endl;
+    cout << "indef_d: ";
+    for (int i = 0; i < 2; i++){
+        if((row == col && i == 0) || (row + col == qr_comp.n - 1 && i == 1))
+            cout << "|" << qr_comp.indef_d[i] << "|" << " ";
+        else
+            cout << qr_comp.indef_d[i] << " ";
+    }
+    cout << endl;
+    
 }
+
+
 
 //APENAS PARA SER USADA DENTRO DO PREPROCESS!!! (ESTA A ALTERAR OS VALORES DE LB, CB, ETC ETC)
 void fillCell(vector<vector<int>> & qr, qr_comp & qr_comp, int row, int col, int value, int & newCellFilledFlag){
+    cout << "-------------------" << endl;
+    cout << "Antes de fill cell: " << endl;
+    print_qr(qr, qr_comp.n, false);
+    print_qr_comp(qr_comp, row, col);
+    cout << "---" << endl;
+    
     newCellFilledFlag++;
     qr[row][col] = value;
     qr_comp.indef_l[row]--;
@@ -142,6 +267,10 @@ void fillCell(vector<vector<int>> & qr, qr_comp & qr_comp, int row, int col, int
         }
         qr_comp.qw[quadrante]--;
     }
+    cout << "Depois de fill cell: " << endl;
+    print_qr_comp(qr_comp, row, col);
+    print_qr(qr, qr_comp.n, false);
+    cout << "-------------------" << endl;
 }
 
 //TODO: trocar as referencias a filas vazias ou cheias de 0 para n - indef e de n para indef, respetivamente
@@ -471,8 +600,17 @@ int isValid(qr_comp & qr_comp, vector<vector<int>> qr){
                 }
             }
         } //fim de uma iteracao de colunas
+        // cout << qr_comp.lt[i] << endl;
+        /*if(qr_comp.lt[i] != 0){
+            return 0;
+        }*/
         
     } //fim de uma iteracao de linhas
+    /*for (int j = 0; j < n; j++){
+        if(qr_comp.ct[j] != 0 || qr_comp.cw[j] != 0){
+            return 0;
+        }
+    }*/
 
     // for(int i = 0; i < qr_comp.n; i++){
     //     cout << qr_comp.lb[i] << " ";
@@ -552,12 +690,6 @@ int generate_check(qr_comp & original_qr_comp, vector<vector<int>> qr, vector<ve
     // if(level == qr_comp.sum) return 0;
     // generate descendants
     vector<int> next{row, col};
-    #ifdef DEBUG
-    for(int i = 0; i < copy_qr_comp.n; i++){
-        cout << copy_qr_comp.lb[i] << " ";
-    }
-    cout << endl;
-    #endif
     while((next = nextCell(original_qr_comp.n, next[0], next[1], qr))[0] != original_qr_comp.n){
         //if(isValidDescendant(copy_qr_comp, next[0], next[1]) == false) continue;
         
@@ -566,7 +698,7 @@ int generate_check(qr_comp & original_qr_comp, vector<vector<int>> qr, vector<ve
         // qr[next[0]][next[1]] = 1;
         int newCellFilled;
         fillCell(copy_qr, copy_qr_comp, next[0], next[1], 1, newCellFilled);
-        generate_check(original_qr_comp, copy_qr, valid_qrs, counter, next[0], next[1], level + 1);
+        //generate_check(original_qr_comp, copy_qr, valid_qrs, counter, next[0], next[1], level + 1);
         fillCell(qr, copy_qr_comp, next[0], next[1], 0, newCellFilled);//qr[next[0]][next[1]] = 0; // @luis tive q por isto para evitar um wrapper. assim a primeira chamada à funcao pode ser feita com row=-1 e col=n-1
         // aceitam-se ideias melhores
     }

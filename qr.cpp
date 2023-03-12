@@ -223,13 +223,13 @@ void print_qr_comp(qr_comp qr_comp, int row, int col) { //para nbao dar destaque
 
 
 
-//APENAS PARA SER USADA DENTRO DO PREPROCESS!!! (ESTA A ALTERAR OS VALORES DE LB, CB, ETC ETC)
+//APENAS PARA SER USADA SOBRE CÉLULAS A -1!!! (ESTA A ALTERAR OS VALORES DE LB, CB, ETC ETC)
 void fillCell(vector<vector<int>> & qr, qr_comp & qr_comp, int row, int col, int value, int & newCellFilledFlag){
-    cout << "-------------------" << endl;
+    /*cout << "-------------------" << endl;
     cout << "Antes de fill cell: " << endl;
     print_qr(qr, qr_comp.n, false);
     print_qr_comp(qr_comp, row, col);
-    cout << "---" << endl;
+    cout << "---" << endl;*/
     
     newCellFilledFlag++;
     qr[row][col] = value;
@@ -241,8 +241,9 @@ void fillCell(vector<vector<int>> & qr, qr_comp & qr_comp, int row, int col, int
 
 
 
+
     //visto q estou a passar por copia, posso decrementar tambem o numero de pretos na linha e coluna, para manter o numero de pretos q falta preencher e nao o numero total
-    if(value == 1){ //se for preto
+    if(value == 1){ //se for preto //se for preto, tambem é preciso ter em conta a possibilidade de transições
         qr_comp.lb[row]--;
         qr_comp.cb[col]--;
         if(row == col) {
@@ -254,6 +255,42 @@ void fillCell(vector<vector<int>> & qr, qr_comp & qr_comp, int row, int col, int
             qr_comp.indef_d[1]--;
         }
         qr_comp.qb[quadrante]--;
+        //tratar das transições
+        //colunas
+
+
+        if(row > 0 && row < qr_comp.n - 1) {
+            if(qr[row - 1][col] == 1) qr_comp.ct[col]++;
+            else qr_comp.ct[col]--;
+            if(qr[row + 1][col] == 1) qr_comp.ct[col]++;
+            else qr_comp.ct[col]--;
+        }
+        else if(row == qr_comp.n - 1) {
+            if(qr[row - 1][col] == 1) qr_comp.ct[col]++;
+            else qr_comp.ct[col]--;
+        }
+        else if(row == 0) {
+            if(qr[1][col] == 1) qr_comp.ct[col]++;
+            else qr_comp.ct[col]--;
+        }
+
+        //linhas
+        
+        if(col > 0 && col < qr_comp.n - 1) {
+            if(qr[row][col - 1] == 1) qr_comp.lt[row]++;
+            else qr_comp.lt[row]--;
+            if(qr[row][col + 1] == 1) qr_comp.lt[row]++;
+            else qr_comp.lt[row]--;
+        }
+        else if(col == qr_comp.n - 1) {
+            if(qr[row][col - 1] == 1) qr_comp.lt[row]++;
+            else qr_comp.lt[row]--;
+        }
+        else if(col == 0) {
+            if(qr[row][1] == 1) qr_comp.lt[row]++;
+            else qr_comp.lt[row]--;
+        }
+        
     } else if(value == 0){ //se for branco
         qr_comp.lw[row]--;
         qr_comp.cw[col]--;
@@ -266,11 +303,11 @@ void fillCell(vector<vector<int>> & qr, qr_comp & qr_comp, int row, int col, int
             qr_comp.indef_d[1]--;
         }
         qr_comp.qw[quadrante]--;
-    }
+    }/*
     cout << "Depois de fill cell: " << endl;
     print_qr_comp(qr_comp, row, col);
     print_qr(qr, qr_comp.n, false);
-    cout << "-------------------" << endl;
+    cout << "-------------------" << endl;*/
 }
 
 //TODO: trocar as referencias a filas vazias ou cheias de 0 para n - indef e de n para indef, respetivamente

@@ -73,7 +73,7 @@ void print_qr(vector<vector<int>> qr, int n, bool inverted){
                 if(qr[i][j] == 1){
                     cout << "#";
                 }else if(qr[i][j] == 0){
-                    cout << "0";
+                    cout << " ";
                 }else if(qr[i][j] == -1){
                     cout << " ";
                 }
@@ -520,6 +520,7 @@ int  pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
 //Check if the qr code is valid. If it is valid return 2, if it is not valid return 0 (can´t proceed), if it is valid but not complete return 1
 //TODO: corrigir as falhas de validação. nao deteta todos os invalidos
 //TODO: adicionar validacao para os brancos tb, neste momento estao a passar ao lado
+//*****AVISO****** esta isValid() NAO PODE ALTERAR NADA NO QR_COMP
 int isValid(qr_comp & qr_comp) {//TODO: , int & level, int & sum){
     int n = qr_comp.n;
     #ifdef DEBUG
@@ -627,7 +628,7 @@ int generate_check(qr_comp & qr_comp_pai, vector<vector<int>> & qr_pai, vector<v
         vector<vector<int>> qr_filho(qr_pai);
         qr_comp qr_comp_filho(qr_comp_pai);
         int newCellFilled;
-        fillCell(qr_filho, qr_comp_filho, next[0], next[1], 1, newCellFilled);
+        fillCell(qr_filho, qr_comp_filho, next[0], next[1], 1, newCellFilled);      
         level++;
         generate_check(qr_comp_filho, qr_filho, valid_qrs, counter, next[0], next[1], level);
         fillCell(qr_pai, qr_comp_pai, next[0], next[1], 0, newCellFilled);//qr[next[0]][next[1]] = 0; // @luis tive q por isto para evitar um wrapper. assim a primeira chamada à funcao pode ser feita com row=-1 e col=n-1
@@ -713,7 +714,7 @@ int main(){
 
         //Detect if the qr code is more black or more white and invert if the later is true (isValid and others get considerably faster)
         bool inverted = false;
-        /*int aux;
+        int aux;
         if(qr_comp.sum > qr_comp.n * qr_comp.n / 2){
             inverted = true;
             #ifdef DEBUG
@@ -739,7 +740,7 @@ int main(){
                 qr_comp.db[i] = qr_comp.dw[i];
                 qr_comp.dw[i] = aux;
             }
-        }*/
+        }
         
 
         vector<vector<int>> qr(qr_comp.n, vector<int>(qr_comp.n, -1));

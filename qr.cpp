@@ -540,144 +540,53 @@ int  pre_proccess(qr_comp qr_comp,  vector<vector<int>> & qr){
 //Check if the qr code is valid. If it is valid return 2, if it is not valid return 0 (can´t proceed), if it is valid but not complete return 1
 //TODO: corrigir as falhas de validação. nao deteta todos os invalidos
 //TODO: adicionar validacao para os brancos tb, neste momento estao a passar ao lado
-int isValid(qr_comp & qr_comp, vector<vector<int>> qr){
+int isValid(qr_comp & qr_comp) {//TODO: , int & level, int & sum){
     int n = qr_comp.n;
-    for (int i = 0; i < n; i++){ //iterar linhas
-        for (int j = 0; j < n; j++){ //iterar colunas
+
+    //verificar pretos e brancos e transicoes q faltam
+    for(int i = 0; i < n; i++){
+        if(qr_comp.lb[i] < 0) return 0;
+        if(qr_comp.lw[i] < 0) return 0;
+        if(qr_comp.cb[i] < 0) return 0;
+        if(qr_comp.cw[i] < 0) return 0;
+        //transicoes
+        if (qr_comp.lt[i] > qr_comp.lb[i]*2) return 0;
+        if (qr_comp.ct[i] > qr_comp.cb[i]*2) return 0;
+    }
+    for(int i = 0; i < 2; i++){
+        if(qr_comp.db[i] < 0) return 0;
+        if(qr_comp.dw[i] < 0) return 0;
+    }
+    for(int i = 0; i < 4; i++){
+        if(qr_comp.qb[i] < 0) return 0;
+        if(qr_comp.qw[i] < 0) return 0;
+    }
+
+    //verificar se, nao havendo invalidez, e estando no nivel correto, esta tudo certo
+    //TODO: if(level == sum) {
+        for(int i = 0; i < n; i++){
+            if(qr_comp.lb[i] != 0) return 1;
+            if(qr_comp.lw[i] != 0) return 1;
+            if(qr_comp.cb[i] != 0) return 1;
+            if(qr_comp.cw[i] != 0) return 1;
             //transicoes
-            if (qr_comp.lt[i] > qr_comp.lb[i]*2){
-                return 0;
-            }
-            if (qr_comp.ct[j] > qr_comp.cb[j]*2){
-                return 0;
-            }
-            
-            /*
-            if (j != n-1  && (((qr[i][j] == 0 || qr[i][j] == -1) && qr[i][j+1] == 1) || (qr[i][j] == 1 && (qr[i][j+1] == 0 || qr[i][j+1] == -1)))){
-                qr_comp.lt[i]--;
-            } 
-            if (i != n-1   && (((qr[i+1][j] == 0 || qr[i+1][j] == -1) && qr[i][j] == 1) || (qr[i+1][j] == 1 && (qr[i][j] == 0 || qr[i][j] == -1)))){
-                qr_comp.ct[j]--;
-            }
-            */
-
-            if (j != n-1  && (!(qr[i][j]-1) != !(qr[i][j+1]-1))){
-                qr_comp.lt[i]--;
-            } 
-            if (i != n-1  && (!(qr[i][j]-1) != !(qr[i+1][j]-1))){
-                qr_comp.ct[j]--;
-            }
-
-            //pretos
-            if (qr[i][j] == 1){
-                qr_comp.lb[i]--;
-                if (qr_comp.lb[i] < 0) return 0;
-                qr_comp.cb[j]--;
-                if (qr_comp.cb[j] < 0) return 0;
-                if (i == j){
-                    qr_comp.db[0]--;
-                    if (qr_comp.db[0] < 0) return 0;
-                }
-                if (n - i - 1 == j ){
-                    qr_comp.db[1]--;
-                    if (qr_comp.db[1] < 0) return 0;
-                }
-                if((i+1) <= n/2){
-                    if((j+1) > n/2){
-                        qr_comp.qb[0]--;
-                        if (qr_comp.qb[0] < 0) return 0;
-                    } else {
-                        qr_comp.qb[1]--;
-                        if (qr_comp.qb[1] < 0) return 0;
-                    }
-                } else {
-                    if((j+1) <= n/2){
-                        qr_comp.qb[2]--;
-                        if (qr_comp.qb[2] < 0) return 0;
-                    } else {
-                        qr_comp.qb[3]--;
-                        if (qr_comp.qb[3] < 0) return 0;
-                    }
-                }
-
-            //brancos
-            } else if (qr[i][j] == 0){
-                qr_comp.lw[i]--;
-                if (qr_comp.lw[i] < 0) return 0;
-                qr_comp.cw[j]--;
-                if (qr_comp.cw[j] < 0) return 0;
-                //TODO: adicionar validacao para as diagonais e quadrantes, mas antes tratar da sua inicializacao e preprocessing
-                //diagonais
-                if (i == j){
-                    qr_comp.dw[0]--;
-                    if (qr_comp.dw[0] < 0) return 0;
-                }
-                if (n - i - 1 == j ){
-                    qr_comp.dw[1]--;
-                    if (qr_comp.dw[1] < 0) return 0;
-                }
-
-                //quadrantes
-                if((i+1) <= n/2){
-                    if((j+1) > n/2){
-                        qr_comp.qw[0]--;
-                        if (qr_comp.qw[0] < 0) return 0;
-                    } else {
-                        qr_comp.qw[1]--;
-                        if (qr_comp.qw[1] < 0) return 0;
-                    }
-                } else {
-                    if((j+1) <= n/2){
-                        qr_comp.qw[2]--;
-                        if (qr_comp.qw[2] < 0) return 0;
-                    } else {
-                        qr_comp.qw[3]--;
-                        if (qr_comp.qw[3] < 0) return 0;
-                    }
-                }
-            }
-        } //fim de uma iteracao de colunas
-        // cout << qr_comp.lt[i] << endl;
-        /*if(qr_comp.lt[i] != 0){
-            return 0;
-        }*/
-        
-    } //fim de uma iteracao de linhas
-    /*for (int j = 0; j < n; j++){
-        if(qr_comp.ct[j] != 0 || qr_comp.cw[j] != 0){
-            return 0;
+            if (qr_comp.lt[i] != 0) return 1;
+            if (qr_comp.ct[i] != 0) return 1;
         }
-    }*/
-
-    // for(int i = 0; i < qr_comp.n; i++){
-    //     cout << qr_comp.lb[i] << " ";
-    // }
-    // cout << endl;
+        for(int i = 0; i < 2; i++){
+            if(qr_comp.db[i] != 0) return 1;
+            if(qr_comp.dw[i] != 0) return 1;
+        }
+        for(int i = 0; i < 4; i++){
+            if(qr_comp.qb[i] != 0) return 1;
+            if(qr_comp.qw[i] != 0) return 1;
+        }
+        return 2; //se chegou aqui, esta tudo certo
+    //}
     
-    
-    
+    //senao, retornar 1 (valido mas ainda nao é o correto)
+    return 1;
 
-    for (int i = 0; i < n; i++){
-        if (qr_comp.lb[i] != 0 || qr_comp.cb[i] != 0){
-            return 1;
-        }
-    }
-    for (int i = 0; i < n; i++){
-        if (qr_comp.lt[i] != 0 || qr_comp.ct[i] != 0){
-            return 1;
-        }
-    }
-    for (int i = 0; i < 2; i++){
-        if (qr_comp.db[i] != 0){
-            return 1;
-        }
-    }
-    for (int i = 0; i < 4; i++){
-        if (qr_comp.qb[i] != 0){
-            return 1;
-        }
-    }
-    return 2;
 }
 
 bool isValidDescendant(qr_comp & qr_comp, int row, int col) { //deteta se a celula pode ser pintada de acordo com os pretos disponiveis
@@ -691,16 +600,16 @@ bool isValidDescendant(qr_comp & qr_comp, int row, int col) { //deteta se a celu
 
 //TODO fazer backtracking ( validar se pode pintar a preto ou a branco , caso se puder pinta senão volta atrás)
 //Fuction that fills the empty spaces of the qr code verifying if it can paint it black or white using backtracking
-int generate_check(qr_comp & original_qr_comp, vector<vector<int>> qr, vector<vector<vector<int>>> & valid_qrs, int & counter, int row, int col, int level){
+int generate_check(qr_comp qr_comp, vector<vector<int>> & qr, vector<vector<vector<int>>> & valid_qrs, int & counter, int row, int col, int level){
     #ifdef DEBUG
     cout << "level: " << level << endl;
     cout << "row: " << row << " col: " << col << endl;
-    print_qr(qr, original_qr_comp.n, false);
+    print_qr(qr, qr_comp.n, false);
     #endif
     
     // check if the qr code is valid
-    qr_comp copy_qr_comp(original_qr_comp);
-    int valid = isValid(copy_qr_comp, qr);
+    //qr_comp copy_qr_comp(original_qr_comp);
+    int valid = isValid(qr_comp);//, level, qr_comp.sum);
     switch(valid){
         case 0:
             #ifdef DEBUG
@@ -727,16 +636,16 @@ int generate_check(qr_comp & original_qr_comp, vector<vector<int>> qr, vector<ve
     // if(level == qr_comp.sum) return 0;
     // generate descendants
     vector<int> next{row, col};
-    while((next = nextCell(original_qr_comp.n, next[0], next[1], qr))[0] != original_qr_comp.n){
+    while((next = nextCell(qr_comp.n, next[0], next[1], qr))[0] != qr_comp.n){
         //if(isValidDescendant(copy_qr_comp, next[0], next[1]) == false) continue;
         
         //print_qr(qr, original_qr_comp.n, false);
         vector<vector<int>> copy_qr(qr);
         // qr[next[0]][next[1]] = 1;
         int newCellFilled;
-        fillCell(copy_qr, copy_qr_comp, next[0], next[1], 1, newCellFilled);
-        //generate_check(original_qr_comp, copy_qr, valid_qrs, counter, next[0], next[1], level + 1);
-        fillCell(qr, copy_qr_comp, next[0], next[1], 0, newCellFilled);//qr[next[0]][next[1]] = 0; // @luis tive q por isto para evitar um wrapper. assim a primeira chamada à funcao pode ser feita com row=-1 e col=n-1
+        fillCell(copy_qr, qr_comp, next[0], next[1], 1, newCellFilled);
+        generate_check(qr_comp, copy_qr, valid_qrs, counter, next[0], next[1], level + 1);
+        fillCell(qr, qr_comp, next[0], next[1], 0, newCellFilled);//qr[next[0]][next[1]] = 0; // @luis tive q por isto para evitar um wrapper. assim a primeira chamada à funcao pode ser feita com row=-1 e col=n-1
         // aceitam-se ideias melhores
     }
     return 0;
@@ -855,7 +764,8 @@ int main(){
         vector<vector<vector<int>>> valid_qrs;
         int counter = 0;
        
-        if(pre_proccess(qr_comp,qr) == -1) {
+        int cellsFilled = 0;
+        if((cellsFilled = pre_proccess(qr_comp,qr)) == -1) {
             cout << "DEFECT: No QR Code generated!" << endl;
             continue;
         }
@@ -882,7 +792,7 @@ int main(){
         #endif
 
 
-        generate_check(qr_comp, qr, valid_qrs, counter, -1, qr_comp.n - 1, 0);
+        generate_check(qr_comp, qr, valid_qrs, counter, -1, qr_comp.n - 1, cellsFilled);
 
         if (counter == 1)
         {

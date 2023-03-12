@@ -73,7 +73,7 @@ void print_qr(vector<vector<int>> qr, int n, bool inverted){
                 if(qr[i][j] == 1){
                     cout << "#";
                 }else if(qr[i][j] == 0){
-                    cout << " ";
+                    cout << "0";
                 }else if(qr[i][j] == -1){
                     cout << " ";
                 }
@@ -326,7 +326,7 @@ int  pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
                 if (qr[i][j] == -1) { //TODO: talvez extrair este if para uma funcao para n estar sempre a repetir codigo
                     fillCell(qr, qr_comp, i, j, 1, newCellFilledFlag);
                 }
-            }
+            } if(qr_comp.lb[i] != 0) return -1;
         }else if(qr_comp.lw[i] == qr_comp.indef_l[i]){ //se o numero de brancos na linha for igual ao numero de indefinidos
             for (int j = 0; j < qr_comp.n; j++){
                 //if(qr_comp.lw[i] == 0) break;
@@ -334,7 +334,7 @@ int  pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
                 if(qr[i][j] == -1){
                     fillCell(qr, qr_comp, i, j, 0, newCellFilledFlag);
                 }
-            }        
+            } if(qr_comp.lw[i] != 0) return -1;
         }
     }
     
@@ -347,7 +347,7 @@ int  pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
                 if(qr[j][i] == -1) {
                     fillCell(qr, qr_comp, j, i, 1, newCellFilledFlag);
                 }
-            }    
+            } if(qr_comp.cb[i] != 0) return -1;
         } else if(qr_comp.cw[i] == qr_comp.indef_c[i]){ //se o numero de brancos na coluna for igual ao numero de indefinidos
             for (int j = 0; j < qr_comp.n; j++){
                 // if(qr_comp.cw[i] == 0) break; //se o numero de brancos na coluna for 0, nao ha mais brancos para pintar (nao ha mais indefinidos
@@ -355,7 +355,7 @@ int  pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
                 if(qr[j][i] == -1) {
                     fillCell(qr, qr_comp, j, i, 0, newCellFilledFlag);
                 }
-            }    
+            } if(qr_comp.cw[i] != 0) return -1;
         }
     }
     
@@ -380,7 +380,7 @@ int  pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
                         }
                     }
                 }
-            }    
+            } if(qr_comp.db[i] != 0) return -1;
         }else if(qr_comp.dw[i] == qr_comp.indef_d[i]){ //se o numero de brancos na diagonal for igual ao numero de indefinidos
             for (int j = 0; j < qr_comp.n; j++){
                 for(int k = 0; k < qr_comp.n; k++){
@@ -398,7 +398,7 @@ int  pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
                     }
                     //qr_comp.db[i]--;
                 }
-            }    
+            } if(qr_comp.dw[i] != 0) return -1;
         }
     }
 
@@ -414,7 +414,7 @@ int  pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
                             fillCell(qr, qr_comp, i, j, 1, newCellFilledFlag);
                         }
                     }
-                }
+                } if(qr_comp.qb[0] != 0) return -1; //se nao for possivel preencher todos entao é invalido
             } else if(q == 1) {//quadrante superior esquerdo
                 for(int i = 0; i < qr_comp.n/2; i++) {
                     for(int j = 0; j < qr_comp.n/2; j++) {
@@ -424,7 +424,7 @@ int  pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
                             fillCell(qr, qr_comp, i, j, 1, newCellFilledFlag);
                         }
                     }
-                }
+                } if(qr_comp.qb[1] != 0) return -1; //se nao for possivel preencher todos entao é invalido
             } else if(q == 2) {//quadrante inferior esquerdo
                 for(int i = qr_comp.n/2; i < qr_comp.n; i++) {
                     for(int j = 0; j < qr_comp.n/2; j++) {
@@ -434,7 +434,7 @@ int  pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
                             fillCell(qr, qr_comp, i, j, 1, newCellFilledFlag);
                         }
                     }
-                }
+                } if(qr_comp.qb[2] != 0) return -1; //se nao for possivel preencher todos entao é invalido
             } else if(q == 3) {//quadrante inferior direito
                 for(int i = qr_comp.n/2; i < qr_comp.n; i++) {
                     for(int j = qr_comp.n/2; j < qr_comp.n; j++) {
@@ -444,7 +444,7 @@ int  pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
                             fillCell(qr, qr_comp, i, j, 1, newCellFilledFlag);
                         }
                     }
-                }
+                } if(qr_comp.qb[3] != 0) return -1; //se nao for possivel preencher todos entao é invalido
             }
         } else if(qr_comp.qw[q] == qr_comp.indef_q[q]) { //se o numero de brancos for igual ao numero de indefinidos no quadrante
             if(q == 0) {//quadrante superior direito
@@ -456,7 +456,7 @@ int  pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
                             fillCell(qr, qr_comp, i, j, 0, newCellFilledFlag);
                         }
                     }
-                }
+                } if(qr_comp.qw[0] != 0) return -1; //se nao for possivel preencher todos entao é invalido
             } else if(q == 1) {//quadrante superior esquerdo
                 for(int i = 0; i < qr_comp.n/2; i++) {
                     for(int j = 0; j < qr_comp.n/2; j++) {
@@ -466,7 +466,7 @@ int  pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
                             fillCell(qr, qr_comp, i, j, 0, newCellFilledFlag);
                         }
                     }
-                }
+                } if(qr_comp.qw[1] != 0) return -1; //se nao for possivel preencher todos entao é invalido
             } else if(q == 2) {//quadrante inferior esquerdo
                 for(int i = qr_comp.n/2; i < qr_comp.n; i++) {
                     for(int j = 0; j < qr_comp.n/2; j++) {
@@ -476,7 +476,7 @@ int  pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
                             fillCell(qr, qr_comp, i, j, 0, newCellFilledFlag);
                         }
                     }
-                }
+                } if(qr_comp.qw[2] != 0) return -1; //se nao for possivel preencher todos entao é invalido
             } else if(q == 3) {//quadrante inferior direito
                 for(int i = qr_comp.n/2; i < qr_comp.n; i++) {
                     for(int j = qr_comp.n/2; j < qr_comp.n; j++) {
@@ -486,12 +486,11 @@ int  pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
                             fillCell(qr, qr_comp, i, j, 0, newCellFilledFlag);
                         }
                     }
-                }
+                } if(qr_comp.qw[3] != 0) return -1; //se nao for possivel preencher todos entao é invalido
             }
         }
     }
     
-    //primeiro acrescentar o codigo em fillCell
 
 
 
@@ -582,12 +581,13 @@ bool isValidDescendant(qr_comp & qr_comp, int row, int col) { //deteta se a celu
 
 //TODO fazer backtracking ( validar se pode pintar a preto ou a branco , caso se puder pinta senão volta atrás)
 //Fuction that fills the empty spaces of the qr code verifying if it can paint it black or white using backtracking
-int generate_check(qr_comp & qr_comp_pai, vector<vector<int>> & qr_pai, vector<vector<vector<int>>> & valid_qrs, int & counter, int row, int col, int level){
+int generate_check(qr_comp & qr_comp_pai, vector<vector<int>> & qr_pai, vector<vector<int>> & valid_qr, int & counter, int row, int col, int level){
     #ifdef DEBUG
     cout << "level: " << level << endl;
     cout << "row: " << row << " col: " << col << endl;
     print_qr(qr_pai, qr_comp_pai.n, false);
     #endif
+
     
     // check if the qr code is valid
     //qr_comp copy_qr_comp(original_qr_comp);
@@ -608,7 +608,7 @@ int generate_check(qr_comp & qr_comp_pai, vector<vector<int>> & qr_pai, vector<v
             cout << "Valid and complete" << endl;
             #endif
             if(!counter) { // é p poupar memoria, mas podemos ver se e necessario
-                valid_qrs.push_back(qr_pai);
+                valid_qr = qr_pai;
             }
             counter++;
             return 1; // @luis aqui parece-me q é return como tinhas mas quero ver isso, n tenho a certeza se estou a pensar bem. os filhos tem obrigatoriamente os pretos dos pais, pelo que acho que mais abaixo na arvore vamos infringir regras (se corresponder ao encoding entao é pq ja nao pode ter mais pretos)
@@ -628,9 +628,26 @@ int generate_check(qr_comp & qr_comp_pai, vector<vector<int>> & qr_pai, vector<v
         vector<vector<int>> qr_filho(qr_pai);
         qr_comp qr_comp_filho(qr_comp_pai);
         int newCellFilled;
-        fillCell(qr_filho, qr_comp_filho, next[0], next[1], 1, newCellFilled);      
+        fillCell(qr_filho, qr_comp_filho, next[0], next[1], 1, newCellFilled);
+        //print_qr_comp(qr_comp_filho, next[0], next[1]);
+        //print_qr(qr_filho, qr_comp_filho.n, false);
+        // dar um preprocess ao filho acabado de gerar para saltar os invalidos
+        int cellsFilled = 0;
+        if((cellsFilled = pre_proccess(qr_comp_filho, qr_filho)) == -1) {
+            #ifdef DEBUG
+            cout << "Invalid on preprocessing" << endl;
+            #endif
+            continue;
+        } else if(cellsFilled > 0) {
+            #ifdef DEBUG
+            cout << "Used preprocessing" << endl;
+            #endif
+        }
+
+
+
         level++;
-        generate_check(qr_comp_filho, qr_filho, valid_qrs, counter, next[0], next[1], level);
+        generate_check(qr_comp_filho, qr_filho, valid_qr, counter, next[0], next[1], level);
         fillCell(qr_pai, qr_comp_pai, next[0], next[1], 0, newCellFilled);//qr[next[0]][next[1]] = 0; // @luis tive q por isto para evitar um wrapper. assim a primeira chamada à funcao pode ser feita com row=-1 e col=n-1
         // aceitam-se ideias melhores
     }
@@ -747,7 +764,7 @@ int main(){
         //cout << "BEFORE pre process" << endl;
         //print_qr(qr, qr_comp.n, false);
         //cout << endl;
-        vector<vector<vector<int>>> valid_qrs;
+        vector<vector<int>> valid_qr;
         int counter = 0;
        
         int cellsFilled = 0;
@@ -779,13 +796,13 @@ int main(){
         #endif
 
 
-        generate_check(qr_comp, qr, valid_qrs, counter, -1, qr_comp.n - 1, cellsFilled);
+        generate_check(qr_comp, qr, valid_qr, counter, -1, qr_comp.n - 1, cellsFilled);
 
         if (counter == 1)
         {
             cout << "VALID: 1 QR Code generated!" << endl;
             //print qr code
-            print_qr(valid_qrs[0],qr_comp.n, inverted);
+            print_qr(valid_qr, qr_comp.n, inverted);
         }else if(counter > 1){
             cout << "INVALID: "<< counter << " QR Codes generated!" << endl;
         }else{

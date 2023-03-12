@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cmath>
 
-#define DEBUG
+// #define DEBUG
 
 using namespace std;
 
@@ -313,28 +313,8 @@ void fillCell(vector<vector<int>> & qr, qr_comp & qr_comp, int row, int col, int
 //TODO: trocar as referencias a filas vazias ou cheias de 0 para n - indef e de n para indef, respetivamente
 //TODO: dar update ao preprocessing das diagonais e acrescentar o dos quadrantes
 //TODO: pensar se a preprocess devera ser chamada em cada chamada recursiva a generate_check ou se devera ser ela propria recusiva, ou os dois
-int  pre_proccess(qr_comp qr_comp,  vector<vector<int>> & qr){
+int  pre_proccess(qr_comp & qr_comp,  vector<vector<int>> & qr){
     int newCellFilledFlag = 0;
-
-
-    /*#ifdef DEBUG
-    for(int i = 0; i < qr_comp.n; i++){
-        cout << "lb[" << i << "] = " << qr_comp.lb[i] << endl;
-        cout << "cb[" << i << "] = " << qr_comp.cb[i] << endl;
-        cout << "lw[" << i << "] = " << qr_comp.lw[i] << endl;
-        cout << "cw[" << i << "] = " << qr_comp.cw[i] << endl;
-        cout << "indef_l[" << i << "] = " << qr_comp.indef_l[i] << endl;
-        cout << "indef_c[" << i << "] = " << qr_comp.indef_c[i] << endl;
-        cout << "lt[" << i << "] = " << qr_comp.lt[i] << endl;
-        cout << "ct[" << i << "] = " << qr_comp.ct[i] << endl;
-    }
-    cout << "db[0] = " << qr_comp.db[0] << endl;
-    cout << "db[1] = " << qr_comp.db[1] << endl;
-    cout << "dw[0] = " << qr_comp.dw[0] << endl;
-    cout << "dw[1] = " << qr_comp.dw[1] << endl;
-    cout << "indef_d[0] = " << qr_comp.indef_d[0] << endl;
-    cout << "indef_d[1] = " << qr_comp.indef_d[1] << endl;
-    #endif*/
     //Pre process linhas //i é row e j é col
     //inicialmente indef = n
     //depois, indef decrementa sempre q se pinta uma celula, quer de preto quer de branco
@@ -542,7 +522,10 @@ int  pre_proccess(qr_comp qr_comp,  vector<vector<int>> & qr){
 //TODO: adicionar validacao para os brancos tb, neste momento estao a passar ao lado
 int isValid(qr_comp & qr_comp) {//TODO: , int & level, int & sum){
     int n = qr_comp.n;
-
+    #ifdef DEBUG
+    cout << "Validating" << endl;
+    print_qr_comp(qr_comp, -1, -1);
+    #endif
     //verificar pretos e brancos e transicoes q faltam
     for(int i = 0; i < n; i++){
         if(qr_comp.lb[i] < 0) return 0;
@@ -550,6 +533,8 @@ int isValid(qr_comp & qr_comp) {//TODO: , int & level, int & sum){
         if(qr_comp.cb[i] < 0) return 0;
         if(qr_comp.cw[i] < 0) return 0;
         //transicoes
+        //if(qr_comp.lt[i] < -2) return 0;
+        //if(qr_comp.ct[i] < -2) return 0;
         if (qr_comp.lt[i] > qr_comp.lb[i]*2) return 0;
         if (qr_comp.ct[i] > qr_comp.cb[i]*2) return 0;
     }
@@ -566,20 +551,16 @@ int isValid(qr_comp & qr_comp) {//TODO: , int & level, int & sum){
     //TODO: if(level == sum) {
         for(int i = 0; i < n; i++){
             if(qr_comp.lb[i] != 0) return 1;
-            if(qr_comp.lw[i] != 0) return 1;
             if(qr_comp.cb[i] != 0) return 1;
-            if(qr_comp.cw[i] != 0) return 1;
             //transicoes
             if (qr_comp.lt[i] != 0) return 1;
             if (qr_comp.ct[i] != 0) return 1;
         }
         for(int i = 0; i < 2; i++){
             if(qr_comp.db[i] != 0) return 1;
-            if(qr_comp.dw[i] != 0) return 1;
         }
         for(int i = 0; i < 4; i++){
             if(qr_comp.qb[i] != 0) return 1;
-            if(qr_comp.qw[i] != 0) return 1;
         }
         return 2; //se chegou aqui, esta tudo certo
     //}
@@ -600,16 +581,16 @@ bool isValidDescendant(qr_comp & qr_comp, int row, int col) { //deteta se a celu
 
 //TODO fazer backtracking ( validar se pode pintar a preto ou a branco , caso se puder pinta senão volta atrás)
 //Fuction that fills the empty spaces of the qr code verifying if it can paint it black or white using backtracking
-int generate_check(qr_comp qr_comp, vector<vector<int>> & qr, vector<vector<vector<int>>> & valid_qrs, int & counter, int row, int col, int level){
+int generate_check(qr_comp & qr_comp_pai, vector<vector<int>> & qr_pai, vector<vector<vector<int>>> & valid_qrs, int & counter, int row, int col, int level){
     #ifdef DEBUG
     cout << "level: " << level << endl;
     cout << "row: " << row << " col: " << col << endl;
-    print_qr(qr, qr_comp.n, false);
+    print_qr(qr_pai, qr_comp_pai.n, false);
     #endif
     
     // check if the qr code is valid
     //qr_comp copy_qr_comp(original_qr_comp);
-    int valid = isValid(qr_comp);//, level, qr_comp.sum);
+    int valid = isValid(qr_comp_pai);//, level, qr_comp.sum);
     switch(valid){
         case 0:
             #ifdef DEBUG
@@ -626,7 +607,7 @@ int generate_check(qr_comp qr_comp, vector<vector<int>> & qr, vector<vector<vect
             cout << "Valid and complete" << endl;
             #endif
             if(!counter) { // é p poupar memoria, mas podemos ver se e necessario
-                valid_qrs.push_back(qr);
+                valid_qrs.push_back(qr_pai);
             }
             counter++;
             return 1; // @luis aqui parece-me q é return como tinhas mas quero ver isso, n tenho a certeza se estou a pensar bem. os filhos tem obrigatoriamente os pretos dos pais, pelo que acho que mais abaixo na arvore vamos infringir regras (se corresponder ao encoding entao é pq ja nao pode ter mais pretos)
@@ -636,16 +617,20 @@ int generate_check(qr_comp qr_comp, vector<vector<int>> & qr, vector<vector<vect
     // if(level == qr_comp.sum) return 0;
     // generate descendants
     vector<int> next{row, col};
-    while((next = nextCell(qr_comp.n, next[0], next[1], qr))[0] != qr_comp.n){
+    
+    while((next = nextCell(qr_comp_pai.n, next[0], next[1], qr_pai))[0] != qr_comp_pai.n){
         //if(isValidDescendant(copy_qr_comp, next[0], next[1]) == false) continue;
         
         //print_qr(qr, original_qr_comp.n, false);
-        vector<vector<int>> copy_qr(qr);
+        
         // qr[next[0]][next[1]] = 1;
+        vector<vector<int>> qr_filho(qr_pai);
+        qr_comp qr_comp_filho(qr_comp_pai);
         int newCellFilled;
-        fillCell(copy_qr, qr_comp, next[0], next[1], 1, newCellFilled);
-        generate_check(qr_comp, copy_qr, valid_qrs, counter, next[0], next[1], level + 1);
-        fillCell(qr, qr_comp, next[0], next[1], 0, newCellFilled);//qr[next[0]][next[1]] = 0; // @luis tive q por isto para evitar um wrapper. assim a primeira chamada à funcao pode ser feita com row=-1 e col=n-1
+        fillCell(qr_filho, qr_comp_filho, next[0], next[1], 1, newCellFilled);
+        level++;
+        generate_check(qr_comp_filho, qr_filho, valid_qrs, counter, next[0], next[1], level);
+        fillCell(qr_pai, qr_comp_pai, next[0], next[1], 0, newCellFilled);//qr[next[0]][next[1]] = 0; // @luis tive q por isto para evitar um wrapper. assim a primeira chamada à funcao pode ser feita com row=-1 e col=n-1
         // aceitam-se ideias melhores
     }
     return 0;
@@ -728,7 +713,7 @@ int main(){
 
         //Detect if the qr code is more black or more white and invert if the later is true (isValid and others get considerably faster)
         bool inverted = false;
-        int aux;
+        /*int aux;
         if(qr_comp.sum > qr_comp.n * qr_comp.n / 2){
             inverted = true;
             #ifdef DEBUG
@@ -754,7 +739,7 @@ int main(){
                 qr_comp.db[i] = qr_comp.dw[i];
                 qr_comp.dw[i] = aux;
             }
-        }
+        }*/
         
 
         vector<vector<int>> qr(qr_comp.n, vector<int>(qr_comp.n, -1));
@@ -789,6 +774,7 @@ int main(){
         #ifdef DEBUG
         cout << "AFTER pre process" << endl;
         print_qr(qr, qr_comp.n, false);
+        print_qr_comp(qr_comp, -1, -1);
         #endif
 
 

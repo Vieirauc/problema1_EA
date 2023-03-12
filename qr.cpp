@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cmath>
 
-#define DEBUG
+// #define DEBUG
 
 using namespace std;
 
@@ -63,9 +63,9 @@ void print_qr(vector<vector<int>> qr, int n, bool inverted){
                 if(qr[i][j] == 1){
                     cout << "#";
                 }else if(qr[i][j] == 0){
-                    cout << " ";
+                    cout << "0"; //aqui tanto o branco como o indef têm que ser " "
                 }else if(qr[i][j] == -1){
-                    cout << " ";
+                    cout << " "; //aqui tanto o branco como o indef têm que ser " "
                 }
             }
             cout << "|" << endl;
@@ -77,7 +77,7 @@ void print_qr(vector<vector<int>> qr, int n, bool inverted){
                 if(qr[i][j] == 1){
                     cout << " ";
                 }else if(qr[i][j] == 0){
-                    cout << "#"; //aqui tanto o branco como o indef têm que ser #
+                    cout << "0"; //aqui tanto o branco como o indef têm que ser #
                 }else if(qr[i][j] == -1){
                     cout << "#"; //aqui tanto o branco como o indef têm que ser #
                 }
@@ -113,6 +113,14 @@ void fillCell(vector<vector<int>> & qr, qr_comp & qr_comp, int row, int col, int
     //indefs das diagonais decrementados dentro dos ifs abaixo
     int quadrante = getQuadrant(qr_comp.n, row, col);
     qr_comp.indef_q[quadrante]--;
+
+    //transicoes
+    if (col != qr_comp.n-1  && (!(qr[row][col]-1) != !(qr[row][col+1]-1))){
+        qr_comp.lt[row]--;
+    } 
+    if (row != qr_comp.n-1  && (!(qr[row][col]-1) != !(qr[row+1][col]-1))){
+        qr_comp.ct[col]--;
+    }
 
 
 
@@ -394,79 +402,111 @@ int isValid(qr_comp & qr_comp, vector<vector<int>> qr){
                 qr_comp.ct[j]--;
             }
             */
-
+            /*
             if (j != n-1  && (!(qr[i][j]-1) != !(qr[i][j+1]-1))){
                 qr_comp.lt[i]--;
             } 
             if (i != n-1  && (!(qr[i][j]-1) != !(qr[i+1][j]-1))){
                 qr_comp.ct[j]--;
-            }
+            }*/
 
             //pretos
             if (qr[i][j] == 1){
                 qr_comp.lb[i]--;
-                if (qr_comp.lb[i] < 0) return 0;
+                if (qr_comp.lb[i] < 0) {
+                        return 0;
+                    }
                 qr_comp.cb[j]--;
-                if (qr_comp.cb[j] < 0) return 0;
+                if (qr_comp.cb[j] < 0) {
+                        return 0;
+                    }
                 if (i == j){
                     qr_comp.db[0]--;
-                    if (qr_comp.db[0] < 0) return 0;
+                    if (qr_comp.db[0] < 0) {
+                            return 0;
+                        }
                 }
                 if (n - i - 1 == j ){
                     qr_comp.db[1]--;
-                    if (qr_comp.db[1] < 0) return 0;
+                    if (qr_comp.db[1] < 0) {
+                            return 0;
+                        }
                 }
                 if((i+1) <= n/2){
                     if((j+1) > n/2){
                         qr_comp.qb[0]--;
-                        if (qr_comp.qb[0] < 0) return 0;
+                        if (qr_comp.qb[0] < 0) {
+                                return 0;
+                            }
                     } else {
                         qr_comp.qb[1]--;
-                        if (qr_comp.qb[1] < 0) return 0;
+                        if (qr_comp.qb[1] < 0) {
+                                return 0;
+                            }
                     }
                 } else {
                     if((j+1) <= n/2){
                         qr_comp.qb[2]--;
-                        if (qr_comp.qb[2] < 0) return 0;
+                        if (qr_comp.qb[2] < 0) {
+                                return 0;
+                            }
                     } else {
                         qr_comp.qb[3]--;
-                        if (qr_comp.qb[3] < 0) return 0;
+                        if (qr_comp.qb[3] < 0) {
+                                return 0;
+                            }
                     }
                 }
 
             //brancos
             } else if (qr[i][j] == 0){
                 qr_comp.lw[i]--;
-                if (qr_comp.lw[i] < 0) return 0;
+                if (qr_comp.lw[i] < 0) {
+                        return 0;
+                    }
                 qr_comp.cw[j]--;
-                if (qr_comp.cw[j] < 0) return 0;
+                if (qr_comp.cw[j] < 0) {
+                        return 0;
+                    }
                 //TODO: adicionar validacao para as diagonais e quadrantes, mas antes tratar da sua inicializacao e preprocessing
                 //diagonais
                 if (i == j){
                     qr_comp.dw[0]--;
-                    if (qr_comp.dw[0] < 0) return 0;
+                    if (qr_comp.dw[0] < 0) {
+                            return 0;
+                        }
                 }
                 if (n - i - 1 == j ){
                     qr_comp.dw[1]--;
-                    if (qr_comp.dw[1] < 0) return 0;
+                    if (qr_comp.dw[1] < 0) {
+                            return 0;
+                        }
                 }
 
                 //quadrantes
                 if((i+1) <= n/2){
                     if((j+1) > n/2){
                         qr_comp.qw[0]--;
-                        if (qr_comp.qw[0] < 0) return 0;
+                        if (qr_comp.qw[0] < 0) {
+                                return 0;
+                            }
                     } else {
                         qr_comp.qw[1]--;
-                        if (qr_comp.qw[1] < 0) return 0;
+                        if (qr_comp.qw[1] < 0) {
+                                return 0;
+                            }
                     }
                 } else {
                     if((j+1) <= n/2){
                         qr_comp.qw[2]--;
-                        if (qr_comp.qw[2] < 0) return 0;
+                        if (qr_comp.qw[2] < 0) {
+                                return 0;
+                            }
                     } else {
                         qr_comp.qw[3]--;
-                        if (qr_comp.qw[3] < 0) return 0;
+                        if (qr_comp.qw[3] < 0) {
+                                return 0;
+                            }
                     }
                 }
             }
@@ -560,13 +600,11 @@ int generate_check(qr_comp & original_qr_comp, vector<vector<int>> qr, vector<ve
     #endif
     while((next = nextCell(original_qr_comp.n, next[0], next[1], qr))[0] != original_qr_comp.n){
         //if(isValidDescendant(copy_qr_comp, next[0], next[1]) == false) continue;
-        
-        //print_qr(qr, original_qr_comp.n, false);
         vector<vector<int>> copy_qr(qr);
-        // qr[next[0]][next[1]] = 1;
         int newCellFilled;
         fillCell(copy_qr, copy_qr_comp, next[0], next[1], 1, newCellFilled);
         generate_check(original_qr_comp, copy_qr, valid_qrs, counter, next[0], next[1], level + 1);
+        // generate_check(original_qr_comp, copy_qr, valid_qrs, counter, next[0], next[1], level + 1);
         fillCell(qr, copy_qr_comp, next[0], next[1], 0, newCellFilled);//qr[next[0]][next[1]] = 0; // @luis tive q por isto para evitar um wrapper. assim a primeira chamada à funcao pode ser feita com row=-1 e col=n-1
         // aceitam-se ideias melhores
     }
